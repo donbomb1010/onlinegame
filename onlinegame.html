@@ -1,0 +1,3195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Games Hub - Khelte Raho!</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom styles for Inter font and general body */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Dark background */
+            color: #e2e8f0; /* Light text */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #2d3748; /* Darker track */
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568; /* Slightly lighter thumb */
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* Even lighter on hover */
+        }
+
+        /* Modal specific styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: #2d3748; /* Dark modal background */
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #cbd5e0; /* Light gray for close button */
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .close-button:hover {
+            color: #ffffff; /* White on hover */
+        }
+
+        /* Specific styles for Memory Game cards */
+        .memory-game-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            width: 320px; /* Adjust as needed */
+            height: 320px; /* Adjust as needed */
+            perspective: 1000px;
+        }
+
+        .memory-card {
+            width: 75px;
+            height: 75px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .memory-card.flip {
+            transform: rotateY(180deg);
+        }
+
+        .front-face, .back-face {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 2.5rem; /* Larger emoji/icon */
+        }
+
+        .front-face {
+            background-color: #38a169; /* Green */
+            color: #fff;
+            transform: rotateY(180deg);
+        }
+
+        .back-face {
+            background-color: #4a5568; /* Dark gray */
+            color: #fff;
+        }
+
+        /* Target Shooter Game Styles */
+        .game-area {
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            background-color: #2d3748;
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+            margin-top: 1rem;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        #target {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-color: #e74c3c; /* Red target */
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease-out; /* Smooth movement */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.7);
+        }
+
+        #target.hit {
+            background-color: #27ae60; /* Green on hit */
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(39, 174, 96, 0.9);
+        }
+
+        /* Sidebar specific styles */
+        .sidebar {
+            width: 64px; /* Fixed width for icons */
+            background-color: #2d3748; /* Darker sidebar background */
+            padding-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-right: 1px solid #4a5568;
+            overflow-y: auto; /* Enable scrolling for many icons */
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        .sidebar-icon {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            color: #cbd5e0;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%; /* Make icons fill sidebar width */
+        }
+
+        .sidebar-icon.active,
+        .sidebar-icon:hover {
+            background-color: #4c51bf; /* Indigo-700 for active/hover */
+            color: #ffffff;
+        }
+
+        /* Adjust main content for sidebar */
+        .main-layout {
+            display: flex;
+            flex-grow: 1;
+        }
+
+        .main-content-area {
+            flex-grow: 1;
+            padding: 1rem 2rem; /* Adjusted padding for main content */
+            overflow-y: auto; /* Enable scrolling for game cards */
+        }
+
+        /* Header adjustments for CrazyGames style */
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .header-search-bar {
+            flex-grow: 1; /* Allow search bar to take available space */
+            max-width: 500px; /* Limit search bar width */
+            margin: 0 1rem; /* Add margin around search bar */
+        }
+
+        .header-user-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem; /* Space between icons/button */
+        }
+
+        .header-user-icon {
+            color: #cbd5e0;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .header-user-icon:hover {
+            color: #ffffff;
+        }
+
+        .header-login-button {
+            background-color: #4c51bf; /* Indigo-700 */
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+
+        .header-login-button:hover {
+            background-color: #5a62e0; /* Darker indigo */
+        }
+
+        /* Favorite heart icon on game cards */
+        .favorite-icon {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            font-size: 1.5rem;
+            color: #cbd5e0;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.2s ease;
+            z-index: 10;
+        }
+
+        .favorite-icon.favorited {
+            color: #e74c3c; /* Red for favorited */
+            transform: scale(1.1);
+        }
+
+        .favorite-icon:hover {
+            color: #ff0000; /* Darker red on hover */
+            transform: scale(1.2);
+        }
+
+        /* Chess Board Styles */
+        #chessBoard {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            width: 400px; /* Adjust size as needed */
+            height: 400px; /* Adjust as needed */
+            border: 4px solid #4a5568;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            margin-top: 1rem;
+        }
+
+        .chess-square {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem; /* Size of chess pieces */
+            cursor: pointer;
+            user-select: none; /* Prevent text selection */
+            transition: background-color 0.2s ease;
+        }
+
+        .chess-square.light {
+            background-color: #f0d9b5; /* Light wood color */
+        }
+
+        .chess-square.dark {
+            background-color: #b58863; /* Dark wood color */
+        }
+
+        .chess-square.selected {
+            background-color: #a0c4ff; /* Light blue for selected square */
+        }
+
+        .chess-square.possible-move {
+            background-color: #66bb6a; /* Green for possible moves */
+        }
+
+        /* Chess piece colors */
+        .chess-piece.white-piece {
+            color: #ffffff; /* White pieces */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        }
+
+        .chess-piece.black-piece {
+            color: #333333; /* Black pieces */
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.7);
+        }
+
+        /* Canvas game specific styles */
+        .game-canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 600px; /* Max width for canvas games */
+            margin: 1rem auto;
+            background-color: #1a202c; /* Dark background for canvas */
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            padding: 1rem;
+        }
+        canvas {
+            background-color: #000;
+            border-radius: 0.5rem;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            display: block; /* Remove extra space below canvas */
+            margin-bottom: 1rem;
+        }
+        .canvas-game-controls button {
+            background-color: #4c51bf;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+        .canvas-game-controls button:hover {
+            background-color: #5a62e0;
+        }
+
+        /* Featured Games Section */
+        .featured-games-section {
+            background-color: #2d3748;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .featured-game-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .featured-game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        /* Game Instructions Styling */
+        .game-instructions {
+            background-color: #1f2937; /* Darker gray for instructions */
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+            text-align: left;
+            border: 1px solid #4a5568;
+        }
+        .game-instructions h4 {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600; /* font-semibold */
+            color: #a78bfa; /* purple-400 */
+            margin-bottom: 0.75rem;
+        }
+        .game-instructions p, .game-instructions ul {
+            font-size: 0.95rem; /* text-sm */
+            color: #cbd5e0; /* text-gray-300 */
+            margin-bottom: 0.5rem;
+        }
+        .game-instructions ul {
+            list-style-type: disc;
+            margin-left: 1.25rem;
+        }
+        .game-instructions li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* Shop Item Styling */
+        .shop-item-card {
+            background-color: #1f2937;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .shop-item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+        }
+        .shop-item-card img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            border: 3px solid #6366f1; /* Indigo-500 */
+        }
+        .shop-item-card h4 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 0.5rem;
+        }
+        .shop-item-card p {
+            color: #cbd5e0;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        .shop-item-card .price {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fcd34d; /* Amber-300 */
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .shop-item-card .price i {
+            margin-right: 0.5rem;
+            color: #fcd34d;
+        }
+        .shop-item-card button {
+            background-color: #4c51bf;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+        .shop-item-card button:hover:not(:disabled) {
+            background-color: #5a62e0;
+        }
+        .shop-item-card button:disabled {
+            background-color: #6b7280;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .shop-success-message {
+            color: #34d399; /* Green-400 */
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+        .shop-error-message {
+            color: #ef4444; /* Red-500 */
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+
+        /* New style for game message areas to prevent layout shifts */
+        .game-message-area {
+            min-height: 2rem; /* Ensures consistent height for messages */
+            line-height: 1.5; /* Standard line height for readability */
+            display: flex; /* Use flex to center content vertically if needed */
+            align-items: center; /* Center content vertically */
+            justify-content: center; /* Center content horizontally */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+
+    <!-- Header Section -->
+    <header class="bg-gray-800 shadow-lg py-4 px-4 md:px-8 rounded-b-xl">
+        <div class="container mx-auto header-container">
+            <!-- Hamburger Menu (Mock) -->
+            <div class="md:hidden text-2xl cursor-pointer text-gray-300 hover:text-white mr-4">
+                <i class="fas fa-bars"></i>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-indigo-400">
+                🎮 Free Games Hub
+            </h1>
+            <!-- Search Bar -->
+            <div class="relative header-search-bar">
+                <input type="text" id="searchInput" placeholder="Search games..."
+                       class="w-full py-2 pl-10 pr-4 bg-gray-700 text-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300 placeholder-gray-400">
+                <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+            <!-- Coin Display and Shop Icon -->
+            <div class="header-user-actions">
+                <span class="text-xl font-bold text-yellow-400 mr-4">
+                    <i class="fas fa-coins mr-1"></i> <span id="coinCount">0</span>
+                </span>
+                <i class="fas fa-store header-user-icon" id="shopIcon" title="Shop"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout: Sidebar + Content -->
+    <div class="main-layout flex-grow">
+        <!-- Left Sidebar -->
+        <aside class="sidebar hidden md:flex" id="sidebar">
+            <div class="sidebar-icon active" data-category="All Games" title="Home"><i class="fas fa-home"></i></div>
+            <div class="sidebar-icon" data-category="Trending" title="Trending"><i class="fas fa-fire"></i></div>
+            <div class="sidebar-icon" data-category="New Games" title="New Games"><i class="fas fa-star"></i></div>
+            <div class="sidebar-icon" data-category="Action" title="Action"><i class="fas fa-fist-raised"></i></div>
+            <div class="sidebar-icon" data-category="Adventure" title="Adventure"><i class="fas fa-map-marked-alt"></i></div>
+            <div class="sidebar-icon" data-category="Puzzle" title="Puzzle"><i class="fas fa-puzzle-piece"></i></div>
+            <div class="sidebar-icon" data-category="Racing" title="Racing"><i class="fas fa-car-side"></i></div>
+            <div class="sidebar-icon" data-category="Shooter" title="Shooter"><i class="fas fa-crosshairs"></i></div>
+            <div class="sidebar-icon" data-category="Sports" title="Sports"><i class="fas fa-baseball-ball"></i></div>
+            <div class="sidebar-icon" data-category="Strategy" title="Strategy"><i class="fas fa-chess-knight"></i></div>
+            <div class="sidebar-icon" data-category="Multiplayer" title="Multiplayer"><i class="fas fa-users"></i></div>
+            <div class="sidebar-icon" data-category="Board" title="Board Games"><i class="fas fa-chess-board"></i></div>
+            <div class="sidebar-icon" data-category="Casual" title="Casual Games"><i class="fas fa-dice"></i></div>
+            <div class="sidebar-icon" data-category="Arcade" title="Arcade Games"><i class="fas fa-gamepad"></i></div>
+        </aside>
+
+        <!-- Main Content Area - Game Cards -->
+        <main class="main-content-area">
+            <!-- Featured Games Section -->
+            <section class="featured-games-section">
+                <h2 class="text-3xl font-bold text-gray-200 mb-6 text-center md:text-left">🔥 Featured Games</h2>
+                <div id="featuredGamesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Featured game cards will be dynamically inserted here -->
+                </div>
+            </section>
+            <section>
+   
+  <script async="async" data-cfasync="false" src="//pl26912395.profitableratecpm.com/6e43b33942e8db637fe0e52324f94bb2/invoke.js"></script>
+<div id="container-6e43b33942e8db637fe0e52324f94bb2"></div>
+
+            </section>
+
+            <h2 id="mainContentTitle" class="text-3xl font-bold text-gray-200 mb-6 text-center md:text-left">All Games</h2>
+            <!-- Category/Filter Dropdown (Mock - now just for display) -->
+            <div class="mb-6 flex justify-center md:justify-start">
+                <select class="bg-gray-700 text-gray-200 py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option>Top games</option>
+                    <option>New games</option>
+                    <option>Action</option>
+                    <option>Adventure</option>
+                    <option>Space</option>
+                </select>
+            </div>
+            <div id="gamesContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Game cards will be dynamically inserted here by JavaScript -->
+            </div>
+            
+        </main>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-800 py-6 px-4 md:px-8 mt-8 rounded-t-xl">
+        <div class="container mx-auto text-center text-gray-400">
+            &copy; 2025 Free Games Hub. Sabhi Rights Reserved.
+        </div>
+                      <script type="text/javascript">
+	atOptions = {
+		'key' : 'e35e859d306243c3bdd3a91697d58adc',
+		'format' : 'iframe',
+		'height' : 50,
+		'width' : 728,
+		'params' : {}
+	};
+</script>
+<script type="text/javascript" src="//www.highperformanceformat.com/e35e859d306243c3bdd3a91697d58adc/invoke.js"></script>
+    </footer>
+
+    <!-- Generic Modal for Games and Info -->
+    <div id="gameModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <button id="closeModalButton" class="close-button">&times;</button>
+            <h3 id="modalTitle" class="text-3xl font-bold text-indigo-400 mb-4 text-center"></h3>
+            <div id="modalContent" class="text-center">
+                <!-- Game content or info message will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Modal -->
+    <div id="shopModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <button id="closeShopModalButton" class="close-button">&times;</button>
+            <h3 class="text-3xl font-bold text-indigo-400 mb-6 text-center">🛒 Shop</h3>
+            <div id="shopItemsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Shop items will be rendered here -->
+            </div>
+            <p id="shopMessage" class="text-lg mt-4 font-semibold"></p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Initialization (MANDATORY GLOBALS)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+        let userCoins = 0;
+        let userInventory = []; // Stores IDs of purchased items
+
+        const coinCountElement = document.getElementById('coinCount');
+
+        // Initialize Firebase and authenticate user
+        async function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Firebase: User signed in:", userId);
+                        setupFirestoreListener();
+                    } else {
+                        // Sign in anonymously if no user is signed in
+                        if (typeof __initial_auth_token !== 'undefined') {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Firebase initialization error:", error);
+                // Display a user-friendly message about the issue
+                const headerActions = document.querySelector('.header-user-actions');
+                if (headerActions) {
+                    headerActions.innerHTML = `<p class="text-red-400 text-sm">Error loading app data. Please try again.</p>`;
+                }
+            }
+        }
+
+        // Setup real-time listener for user data
+        function setupFirestoreListener() {
+            if (!userId || !db) {
+                console.warn("Firestore listener not set up: userId or db not available.");
+                return;
+            }
+
+            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/private`, 'user_data');
+
+            onSnapshot(userDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    userCoins = data.coins || 0;
+                    userInventory = data.inventory || [];
+                    console.log("User data updated:", userCoins, userInventory);
+                } else {
+                    // Create initial user data if it doesn't exist
+                    console.log("No user data found, creating new record.");
+                    setDoc(userDocRef, { coins: 0, inventory: [] });
+                    userCoins = 0;
+                    userInventory = [];
+                }
+                updateCoinDisplay();
+                renderShop(); // Re-render shop to update item statuses (e.g., "Owned")
+            }, (error) => {
+                console.error("Error listening to user data:", error);
+            });
+        }
+
+        // Update coin display in the header
+        function updateCoinDisplay() {
+            if (coinCountElement) {
+                coinCountElement.textContent = userCoins;
+            }
+        }
+
+        // Function to award coins
+        async function awardCoins(amount) {
+            if (!userId || !db) {
+                console.error("Cannot award coins: User not authenticated or Firestore not ready.");
+                return;
+            }
+            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/private`, 'user_data');
+            try {
+                await updateDoc(userDocRef, {
+                    coins: userCoins + amount
+                });
+                console.log(`${amount} coins awarded to ${userId}. New balance: ${userCoins + amount}`);
+            } catch (error) {
+                console.error("Error awarding coins:", error);
+            }
+        }
+
+        // Shop Items Definition
+        const shopItems = [
+            {
+                id: 'theme-blue',
+                name: 'Blue Theme',
+                price: 100,
+                description: 'Unlock a cool blue theme for the portal.',
+                imageUrl: 'https://placehold.co/80x80/6366f1/ffffff?text=Blue',
+                type: 'theme',
+                applyEffect: () => {
+                    document.body.style.backgroundColor = '#2a2a4a'; // Darker blue background
+                    document.querySelector('header').style.backgroundColor = '#3a3a6a';
+                    document.querySelector('footer').style.backgroundColor = '#3a3a6a';
+                    document.querySelector('.sidebar').style.backgroundColor = '#3a3a6a';
+                    document.querySelector('.main-content-area').style.backgroundColor = '#1a1a3a';
+                    document.querySelector('.featured-games-section').style.backgroundColor = '#3a3a6a';
+                    document.querySelectorAll('.game-card').forEach(card => card.style.backgroundColor = '#3a3a6a');
+                    document.querySelectorAll('.shop-item-card').forEach(card => card.style.backgroundColor = '#3a3a6a');
+                    document.querySelectorAll('.game-instructions').forEach(inst => inst.style.backgroundColor = '#2a2a4a');
+                    document.querySelectorAll('.chess-square.dark').forEach(sq => sq.style.backgroundColor = '#4a4a8a');
+                    document.querySelectorAll('.chess-square.light').forEach(sq => sq.style.backgroundColor = '#8a8acb');
+                    document.querySelectorAll('canvas').forEach(canvas => canvas.style.backgroundColor = '#1a1a3a');
+                    document.querySelectorAll('.game-area').forEach(area => area.style.backgroundColor = '#3a3a6a');
+                    document.querySelectorAll('.game-instructions h4').forEach(h4 => h4.style.color = '#93c5fd'); // Blue-300
+                    document.querySelectorAll('.shop-item-card .price').forEach(price => price.style.color = '#93c5fd');
+                    document.querySelectorAll('.shop-item-card .price i').forEach(icon => icon.style.color = '#93c5fd');
+                    document.querySelectorAll('.shop-item-card button').forEach(btn => btn.style.backgroundColor = '#60a5fa'); // Blue-400
+                }
+            },
+            {
+                id: 'theme-green',
+                name: 'Green Theme',
+                price: 150,
+                description: 'Unlock a refreshing green theme.',
+                imageUrl: 'https://placehold.co/80x80/10b981/ffffff?text=Green',
+                type: 'theme',
+                applyEffect: () => {
+                    document.body.style.backgroundColor = '#103a2a'; // Darker green background
+                    document.querySelector('header').style.backgroundColor = '#204a3a';
+                    document.querySelector('footer').style.backgroundColor = '#204a3a';
+                    document.querySelector('.sidebar').style.backgroundColor = '#204a3a';
+                    document.querySelector('.main-content-area').style.backgroundColor = '#0a2a1a';
+                    document.querySelector('.featured-games-section').style.backgroundColor = '#204a3a';
+                    document.querySelectorAll('.game-card').forEach(card => card.style.backgroundColor = '#204a3a');
+                    document.querySelectorAll('.shop-item-card').forEach(card => card.style.backgroundColor = '#204a3a');
+                    document.querySelectorAll('.game-instructions').forEach(inst => inst.style.backgroundColor = '#103a2a');
+                    document.querySelectorAll('.chess-square.dark').forEach(sq => sq.style.backgroundColor = '#3a5a4a');
+                    document.querySelectorAll('.chess-square.light').forEach(sq => sq.style.backgroundColor = '#7a9a8a');
+                    document.querySelectorAll('canvas').forEach(canvas => canvas.style.backgroundColor = '#0a2a1a');
+                    document.querySelectorAll('.game-area').forEach(area => area.style.backgroundColor = '#204a3a');
+                    document.querySelectorAll('.game-instructions h4').forEach(h4 => h4.style.color = '#34d399'); // Green-400
+                    document.querySelectorAll('.shop-item-card .price').forEach(price => price.style.color = '#34d399');
+                    document.querySelectorAll('.shop-item-card .price i').forEach(icon => icon.style.color = '#34d399');
+                    document.querySelectorAll('.shop-item-card button').forEach(btn => btn.style.backgroundColor = '#10b981'); // Green-500
+                }
+            },
+            {
+                id: 'player-skin-star',
+                name: 'Star Player Skin',
+                price: 50,
+                description: 'Change your player character to a star in some games.',
+                imageUrl: 'https://placehold.co/80x80/facc15/000000?text=⭐',
+                type: 'skin',
+                applyEffect: () => {
+                    // This is a mock effect. Actual game integration would be needed.
+                    console.log("Star Player Skin applied! (Visual effect not implemented in all games)");
+                }
+            },
+            {
+                id: 'coin-boost-100',
+                name: 'Coin Boost (Temporary)',
+                price: 75,
+                description: 'Next 3 games will give double coins!',
+                imageUrl: 'https://placehold.co/80x80/fbbf24/000000?text=x2',
+                type: 'boost',
+                applyEffect: () => {
+                    // This is a mock effect. Actual game integration would be needed.
+                    console.log("Coin Boost activated! (Effect not fully implemented)");
+                }
+            }
+        ];
+
+        // Function to render shop items
+        function renderShop() {
+            const shopItemsContainer = document.getElementById('shopItemsContainer');
+            const shopMessage = document.getElementById('shopMessage');
+            if (!shopItemsContainer) return;
+
+            shopItemsContainer.innerHTML = ''; // Clear existing items
+            shopMessage.textContent = ''; // Clear previous messages
+
+            shopItems.forEach(item => {
+                const isOwned = userInventory.includes(item.id);
+                const canAfford = userCoins >= item.price;
+
+                const itemCard = document.createElement('div');
+                itemCard.className = 'shop-item-card';
+                itemCard.innerHTML = `
+                    <img src="${item.imageUrl}" alt="${item.name}">
+                    <h4>${item.name}</h4>
+                    <p>${item.description}</p>
+                    <div class="price">
+                        <i class="fas fa-coins"></i> ${item.price}
+                    </div>
+                    <button data-item-id="${item.id}" ${isOwned || !canAfford ? 'disabled' : ''}>
+                        ${isOwned ? 'Owned' : (canAfford ? 'Buy Now' : 'Not Enough Coins')}
+                    </button>
+                `;
+                shopItemsContainer.appendChild(itemCard);
+            });
+
+            // Add event listeners to buy buttons
+            document.querySelectorAll('.shop-item-card button').forEach(button => {
+                button.addEventListener('click', async (event) => {
+                    const itemId = event.target.dataset.itemId;
+                    const itemToBuy = shopItems.find(item => item.id === itemId);
+
+                    if (itemToBuy && userCoins >= itemToBuy.price && !userInventory.includes(itemId)) {
+                        await buyItem(itemToBuy);
+                    } else if (userInventory.includes(itemId)) {
+                        shopMessage.textContent = 'Aapke paas yeh item pehle se hai!';
+                        shopMessage.className = 'shop-error-message';
+                    } else {
+                        shopMessage.textContent = 'Aapke paas itne coins nahi hain!';
+                        shopMessage.className = 'shop-error-message';
+                    }
+                });
+            });
+        }
+
+        // Function to handle buying an item
+        async function buyItem(item) {
+            if (!userId || !db) {
+                console.error("Cannot buy item: User not authenticated or Firestore not ready.");
+                return;
+            }
+            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/private`, 'user_data');
+            try {
+                // Deduct coins and add item to inventory
+                await updateDoc(userDocRef, {
+                    coins: userCoins - item.price,
+                    inventory: [...userInventory, item.id] // Add new item ID
+                });
+                console.log(`${item.name} purchased!`);
+                shopMessage.textContent = `${item.name} khareed liya! 🎉`;
+                shopMessage.className = 'shop-success-message';
+
+                // Apply immediate effect if any
+                if (item.applyEffect && typeof item.applyEffect === 'function') {
+                    item.applyEffect();
+                }
+
+            } catch (error) {
+                console.error("Error buying item:", error);
+                shopMessage.textContent = 'Item khareedne mein error hua.';
+                shopMessage.className = 'shop-error-message';
+            }
+        }
+
+
+        // Array of game objects with added categories and coin rewards
+        const games = [
+            {
+                id: 'click-counter',
+                name: 'Click Counter Challenge',
+                imageUrl: 'https://placehold.co/400x250/3498db/ffffff?text=Click+Game',
+                description: 'Dekho kitni jaldi click kar sakte ho!',
+                type: 'internal',
+                category: ['Casual', 'New Games'],
+                coinReward: 10, // Coins for winning
+                winCondition: (score) => score >= 50, // Win if score is 50 or more
+                gameHtml: `
+                    <div class="flex flex-col items-center justify-center p-4">
+                        <p class="text-xl mb-4">Clicks: <span id="clickCount" class="font-bold text-indigo-400 text-3xl">0</span></p>
+                        <button id="clickButton" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition duration-300 hover:scale-105">
+                            Click Me!
+                        </button>
+                        <p id="clickGameMessage" class="text-lg mt-4 font-semibold text-gray-300 game-message-area"></p>
+                        <div class="game-instructions">
+                            <h4>Kaise Khelein:</h4>
+                            <p>Jitni jaldi ho sake button par click karein aur apna score badhayein. 50 clicks par aapko ${10} coins milenge!</p>
+                            <h4>Controls:</h4>
+                            <ul>
+                                <li><strong>Mouse Click:</strong> Button par click karne ke liye.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                gameScript: function() {
+                    let count = 0;
+                    const clickCountElement = document.getElementById('clickCount');
+                    const clickButton = document.getElementById('clickButton');
+                    const clickGameMessage = document.getElementById('clickGameMessage');
+                    const gameInstance = games.find(g => g.id === 'click-counter');
+
+                    if (clickButton && clickCountElement) {
+                        clickButton.onclick = () => {
+                            count++;
+                            clickCountElement.textContent = count;
+                            if (gameInstance.winCondition(count)) {
+                                clickGameMessage.textContent = `Mubarak ho! Aapne ${gameInstance.coinReward} coins jeete!`;
+                                clickGameMessage.classList.add('text-green-400');
+                                clickButton.disabled = true;
+                                awardCoins(gameInstance.coinReward);
+                            }
+                        };
+                    }
+                }
+            },
+            {
+                id: 'guess-number',
+                name: 'Guess The Number',
+                imageUrl: 'https://placehold.co/400x250/e74c3c/ffffff?text=Guess+Game',
+                description: 'Ek number guess karo 1 se 100 ke beech!',
+                type: 'internal',
+                category: ['Puzzle', 'Casual'],
+                coinReward: 20,
+                winCondition: (isCorrect) => isCorrect,
+                gameHtml: `
+                    <div class="flex flex-col items-center justify-center p-4">
+                        <p class="text-xl mb-4">Guess a number between 1 and 100:</p>
+                        <input type="number" id="guessInput" class="w-full max-w-xs p-3 mb-4 bg-gray-700 text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button id="submitGuessButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition duration-300 hover:scale-105 mb-4">
+                            Submit Guess
+                        </button>
+                        <p id="guessFeedback" class="text-lg font-semibold text-center game-message-area"></p>
+                        <div class="game-instructions">
+                            <h4>Kaise Khelein:</h4>
+                            <p>Ek number 1 se 100 ke beech socha gaya hai. Aapko us number ko guess karna hai. Har guess ke baad, aapko bataya jayega ki aapka guess bada hai ya chhota. Sahi guess karne par aapko ${20} coins milenge!</p>
+                            <h4>Controls:</h4>
+                            <ul>
+                                <li><strong>Number Input Box:</strong> Apna guess enter karein.</li>
+                                <li><strong>Submit Guess Button:</strong> Apna guess submit karne ke liye.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                gameScript: function() {
+                    const randomNumber = Math.floor(Math.random() * 100) + 1;
+                    const guessInput = document.getElementById('guessInput');
+                    const submitGuessButton = document.getElementById('submitGuessButton');
+                    const guessFeedback = document.getElementById('guessFeedback');
+                    const gameInstance = games.find(g => g.id === 'guess-number');
+
+                    if (submitGuessButton && guessInput && guessFeedback) {
+                        submitGuessButton.onclick = () => {
+                            const userGuess = parseInt(guessInput.value);
+                            if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
+                                guessFeedback.textContent = 'Kripya 1 aur 100 ke beech ek sahi number daalein.';
+                                guessFeedback.className = 'text-lg font-semibold text-red-400 text-center game-message-area';
+                                return;
+                            }
+                            if (userGuess === randomNumber) {
+                                guessFeedback.textContent = 'Mubarak ho! Aapne sahi guess kiya! 🎉';
+                                guessFeedback.className = 'text-lg font-semibold text-green-400 text-center game-message-area';
+                                submitGuessButton.disabled = true;
+                                guessInput.disabled = true;
+                                awardCoins(gameInstance.coinReward);
+                            } else if (userGuess < randomNumber) {
+                                guessFeedback.textContent = 'Aapka guess chhota hai. Thoda aur bada number socho.';
+                                guessFeedback.className = 'text-lg font-semibold text-orange-400 text-center game-message-area';
+                            } else {
+                                guessFeedback.textContent = 'Aapka guess bada hai. Thoda aur chhota number socho.';
+                                guessFeedback.className = 'text-lg font-semibold text-orange-400 text-center game-message-area';
+                            }
+                        };
+                    }
+                }
+            },
+            {
+                id: 'tic-tac-toe',
+                name: 'Tic Tac Toe',
+                imageUrl: 'https://placehold.co/400x250/8e44ad/ffffff?text=Tic+Tac+Toe',
+                description: 'Computer ke khilaaf Tic Tac Toe khelo!',
+                type: 'internal',
+                category: ['Board', 'Strategy'],
+                coinReward: 15,
+                winCondition: (winner) => winner === 'Aap',
+                gameHtml: `
+                    <div class="flex flex-col items-center justify-center p-4">
+                        <div id="gameModeMessage" class="text-lg text-gray-300 mb-4">Computer ke khilaaf khelein.</div>
+                        <div id="boardContainer">
+                            <div id="board" class="grid grid-cols-3 gap-2 w-64 h-64 bg-gray-800 p-2 rounded-lg shadow-inner"></div>
+                            <p id="status" class="text-xl font-bold mt-4 text-indigo-300 game-message-area"></p>
+                            <button id="resetButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transform transition duration-300 hover:scale-105 mt-4">
+                                Reset Game
+                            </button>
+                        </div>
+                        <div class="game-instructions">
+                            <h4>Kaise Khelein:</h4>
+                            <p>Aap X hain aur Computer O hai. Apni baari mein board par ek khaali square par click karein. Pehla player jo apne teen nishanon ko horizontal, vertical, ya diagonal line mein laga dega, woh jeet jayega. Computer ko harane par aapko ${15} coins milenge!</p>
+                            <h4>Controls:</h4>
+                            <ul>
+                                <li><strong>Mouse Click:</strong> Board par square choose karne ke liye.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                gameScript: function() {
+                    const gameModeMessage = document.getElementById('gameModeMessage');
+                    const boardContainer = document.getElementById('boardContainer');
+                    const board = document.getElementById('board');
+                    const status = document.getElementById('status');
+                    const resetButton = document.getElementById('resetButton');
+                    const gameInstance = games.find(g => g.id === 'tic-tac-toe');
+
+
+                    let cells = Array(9).fill(null);
+                    let currentPlayer = 'X';
+                    let gameActive = true;
+
+                    const winningConditions = [
+                        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                        [0, 4, 8], [2, 4, 6]
+                    ];
+
+                    const handleCellClick = (e) => {
+                        const clickedCell = e.target;
+                        const clickedCellIndex = parseInt(clickedCell.dataset.index);
+
+                        if (cells[clickedCellIndex] !== null || !gameActive || currentPlayer === 'O') {
+                            return;
+                        }
+
+                        makeMove(clickedCellIndex, currentPlayer);
+                    };
+
+                    const makeMove = (index, player) => {
+                        cells[index] = player;
+                        const cellElement = board.querySelector('[data-index="' + index + '"]');
+                        if (cellElement) {
+                            cellElement.textContent = player;
+                            cellElement.classList.add(player === 'X' ? 'text-green-400' : 'text-red-400');
+                        }
+                        checkResult();
+                    };
+
+                    const computerMove = () => {
+                        const emptyCells = cells.map((cell, index) => cell === null ? index : -1).filter(index => index !== -1);
+                        if (emptyCells.length > 0 && gameActive) {
+                            const randomIndex = Math.floor(Math.random() * emptyCells.length);
+                            const chosenIndex = emptyCells[randomIndex];
+                            setTimeout(() => {
+                                makeMove(chosenIndex, 'O');
+                            }, 500);
+                        }
+                    };
+
+                    const checkResult = () => {
+                        let roundWon = false;
+                        for (let i = 0; i < winningConditions.length; i++) {
+                            const winCondition = winningConditions[i];
+                            let a = cells[winCondition[0]];
+                            let b = cells[winCondition[1]];
+                            let c = cells[winCondition[2]];
+
+                            if (a === null || b === null || c === null) {
+                                continue;
+                            }
+                            if (a === b && b === c) {
+                                roundWon = true;
+                                break;
+                            }
+                        }
+
+                        if (roundWon) {
+                            const winner = currentPlayer === 'X' ? 'Aap' : 'Computer';
+                            status.textContent = winner + " jeet gaya! 🎉";
+                            status.className = 'text-xl font-bold mt-4 ' + (currentPlayer === 'X' ? 'text-green-400' : 'text-red-400') + ' game-message-area';
+                            gameActive = false;
+                            if (gameInstance.winCondition(winner)) {
+                                awardCoins(gameInstance.coinReward);
+                            }
+                            return;
+                        }
+
+                        let roundDraw = !cells.includes(null);
+                        if (roundDraw) {
+                            status.textContent = 'Game Draw ho gaya! 🤝';
+                            status.className = 'text-xl font-bold mt-4 text-yellow-400 game-message-area';
+                            gameActive = false;
+                            return;
+                        }
+
+                        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                        const nextPlayer = currentPlayer === 'X' ? 'Aapki' : 'Computer ki';
+                        status.textContent = "Ab " + nextPlayer + " baari hai";
+                        status.className = 'text-xl font-bold mt-4 text-indigo-300 game-message-area';
+
+                        if (currentPlayer === 'O' && gameActive) { // Computer's turn
+                            computerMove();
+                        }
+                    };
+
+                    const resetGame = () => {
+                        cells = Array(9).fill(null);
+                        currentPlayer = 'X';
+                        gameActive = true;
+                        gameModeMessage.textContent = "Computer ke khilaaf khelein.";
+                        status.textContent = "Ab Aapki baari hai";
+                        status.className = 'text-xl font-bold mt-4 text-indigo-300 game-message-area';
+                        board.innerHTML = '';
+                        createCells();
+                    };
+
+                    const createCells = () => {
+                        for (let i = 0; i < 9; i++) {
+                            const cell = document.createElement('div');
+                            cell.dataset.index = i;
+                            cell.classList.add('w-full', 'h-full', 'flex', 'items-center', 'justify-center', 'bg-gray-700', 'rounded-md', 'text-5xl', 'font-bold', 'cursor-pointer', 'select-none', 'transition', 'duration-200', 'hover:bg-gray-600');
+                            cell.addEventListener('click', handleCellClick);
+                            board.appendChild(cell);
+                        }
+                    };
+
+                    resetButton.addEventListener('click', resetGame);
+                    resetGame(); // Initial setup
+                }
+            },
+            {
+                id: 'memory-game',
+                name: 'Memory Game',
+                imageUrl: 'https://placehold.co/400x250/34495e/ffffff?text=Memory+Game',
+                description: 'Cards match karo aur jeeto!',
+                type: 'internal',
+                category: ['Puzzle', 'Casual'],
+                coinReward: 25,
+                winCondition: (matchesFound) => matchesFound === 8, // 8 pairs
+                gameHtml: `
+                    <div class="flex flex-col items-center justify-center p-4">
+                        <div id="memoryGameContent">
+                            <div id="memoryGameGrid" class="memory-game-grid"></div>
+                            <p id="memoryStatus" class="text-xl font-bold mt-4 text-indigo-300 game-message-area"></p>
+                            <button id="memoryResetButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transform transition duration-300 hover:scale-105 mt-4">
+                                Reset Memory Game
+                            </button>
+                        </div>
+                        <div class="game-instructions">
+                            <h4>Kaise Khelein:</h4>
+                            <p>Cards ko palat kar unke matching pairs dhoondhein. Ek baar mein do cards palat sakte hain. Agar cards match karte hain, toh woh khule rehte hain, warna woh wapas palat jaate hain. Saare pairs dhoondhne par aap jeet jaayenge aur ${25} coins milenge!</p>
+                            <h4>Controls:</h4>
+                            <ul>
+                                <li><strong>Mouse Click:</strong> Cards ko palatne ke liye.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                gameScript: function() {
+                    const memoryGameGrid = document.getElementById('memoryGameGrid');
+                    const memoryStatus = document.getElementById('memoryStatus');
+                    const memoryResetButton = document.getElementById('memoryResetButton');
+                    const gameInstance = games.find(g => g.id === 'memory-game');
+
+                    let cards = [];
+                    let hasFlippedCard = false;
+                    let lockBoard = false;
+                    let firstCard, secondCard;
+                    let matchesFound = 0;
+
+                    const emojis = ['🍎', '🍌', '🍒', '🍇', '🍋', '🍉', '🍍', '🍓']; // 8 unique emojis
+
+                    const shuffle = (array) => {
+                        for (let i = array.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [array[i], array[j]] = [array[j], array[i]];
+                        }
+                        return array;
+                    };
+
+                    const createBoard = () => {
+                        memoryGameGrid.innerHTML = '';
+                        cards = shuffle([...emojis, ...emojis]); // Duplicate emojis for pairs
+                        matchesFound = 0;
+                        memoryStatus.textContent = 'Cards match karo!';
+
+                        cards.forEach((emoji, index) => {
+                            const card = document.createElement('div');
+                            card.classList.add('memory-card');
+                            card.dataset.emoji = emoji;
+                            card.dataset.index = index; // Add index for unique identification
+
+                            card.innerHTML = `
+                                <div class="front-face">${emoji}</div>
+                                <div class="back-face"></div>
+                            `;
+                            card.addEventListener('click', flipCard);
+                            memoryGameGrid.appendChild(card);
+                        });
+                    };
+
+                    function flipCard() {
+                        if (lockBoard) return;
+                        if (this === firstCard) return; // Prevent double clicking the same card
+
+                        this.classList.add('flip');
+
+                        if (!hasFlippedCard) {
+                            // First card flipped
+                            hasFlippedCard = true;
+                            firstCard = this;
+                            return;
+                        }
+
+                        // Second card flipped
+                        secondCard = this;
+                        checkForMatch();
+                    }
+
+                    function checkForMatch() {
+                        let isMatch = firstCard.dataset.emoji === secondCard.dataset.emoji;
+
+                        isMatch ? disableCards() : unflipCards();
+                    }
+
+                    function disableCards() {
+                        firstCard.removeEventListener('click', flipCard);
+                        secondCard.removeEventListener('click', flipCard);
+                        matchesFound++;
+                        memoryStatus.textContent = 'Match mil gaya! 🎉';
+                        resetBoard();
+
+                        if (gameInstance.winCondition(matchesFound)) {
+                            memoryStatus.textContent = `Mubarak ho! Aapne saare cards match kar liye! 🥳 Aapne ${gameInstance.coinReward} coins jeete!`;
+                            memoryStatus.classList.add('text-green-400');
+                            awardCoins(gameInstance.coinReward);
+                            // Optionally, disable further clicks or show a "Play Again" button
+                        }
+                    }
+
+                    function unflipCards() {
+                        lockBoard = true; // Prevent further clicks during unflip animation
+                        memoryStatus.textContent = 'Match nahi mila. Dobara try karo!';
+                        memoryStatus.classList.add('text-red-400');
+
+                        setTimeout(() => {
+                            firstCard.classList.remove('flip');
+                            secondCard.classList.remove('flip');
+                            resetBoard();
+                        }, 1000); // Wait for 1 second before unflipping
+                    }
+
+                    function resetBoard() {
+                        [hasFlippedCard, lockBoard] = [false, false];
+                        [firstCard, secondCard] = [null, null];
+                        memoryStatus.classList.remove('text-red-400'); // Clear red status
+                    }
+
+                    const resetMemoryGame = () => {
+                        memoryStatus.classList.remove('text-green-400');
+                        createBoard();
+                        // Unflip all cards at reset
+                        document.querySelectorAll('.memory-card').forEach(card => card.classList.remove('flip'));
+                        resetBoard(); // Reset game state variables
+                    };
+
+                    memoryResetButton.addEventListener('click', resetMemoryGame);
+                    createBoard(); // Initial setup
+                }
+            },
+            {
+                id: 'target-shooter',
+                name: 'Target Shooter',
+                imageUrl: 'https://placehold.co/400x250/2ecc71/ffffff?text=Target+Shooter',
+                description: 'Target ko click karo aur score banao!',
+                type: 'internal',
+                category: ['Action', 'Shooter', 'New Games'],
+                coinReward: 15,
+                winCondition: (score) => score >= 50,
+                gameHtml: `
+                    <div class="flex flex-col items-center justify-center p-4">
+                        <p class="text-xl mb-4">Score: <span id="shooterScore" class="font-bold text-indigo-400 text-3xl">0</span></p>
+                        <div id="gameArea" class="game-area">
+                            <div id="target">🎯</div>
+                        </div>
+                        <button id="shooterResetButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transform transition duration-300 hover:scale-105 mt-4">
+                            Reset Game
+                        </button>
+                        <p id="shooterGameMessage" class="text-lg mt-4 font-semibold text-gray-300 game-message-area"></p>
+                        <div class="game-instructions">
+                            <h4>Kaise Khelein:</h4>
+                            <p>Screen par dikhne wale target ko click karein. Har sahi click par aapko points milenge. Target alag-alag jagahon par dikhega. 50 score banane par aapko ${15} coins milenge!</p>
+                            <h4>Controls:</h4>
+                            <ul>
+                                <li><strong>Mouse Click:</strong> Target par click karne ke liye.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                gameScript: function() {
+                    const gameArea = document.getElementById('gameArea');
+                    const target = document.getElementById('target');
+                    const shooterScoreDisplay = document.getElementById('shooterScore');
+                    const shooterResetButton = document.getElementById('shooterResetButton');
+                    const shooterGameMessage = document.getElementById('shooterGameMessage');
+                    const gameInstance = games.find(g => g.id === 'target-shooter');
+
+                    let score = 0;
+                    let gameInterval;
+                    let targetMoveInterval;
+                    let gameActive = false;
+                    let coinsAwarded = false;
+
+                    const moveTarget = () => {
+                        const maxX = gameArea.clientWidth - target.clientWidth;
+                        const maxY = gameArea.clientHeight - target.clientHeight;
+
+                        const randomX = Math.floor(Math.random() * maxX);
+                        const randomY = Math.floor(Math.random() * maxY);
+
+                        target.style.left = randomX + 'px';
+                        target.style.top = randomY + 'px';
+                        target.classList.remove('hit'); // Remove hit class for next appearance
+                    };
+
+                    const startGame = () => {
+                        score = 0;
+                        shooterScoreDisplay.textContent = score;
+                        shooterGameMessage.textContent = '';
+                        shooterGameMessage.classList.remove('text-green-400');
+                        gameActive = true;
+                        coinsAwarded = false;
+                        moveTarget(); // Initial target position
+
+                        // Move target every 1.5 seconds
+                        targetMoveInterval = setInterval(moveTarget, 1500);
+                    };
+
+                    const stopGame = () => {
+                        gameActive = false;
+                        clearInterval(targetMoveInterval);
+                        target.style.display = 'none'; // Hide target when game stops
+                    };
+
+                    target.onclick = () => {
+                        if (gameActive) {
+                            score++;
+                            shooterScoreDisplay.textContent = score;
+                            target.classList.add('hit'); // Add hit effect
+                            // Move target immediately after hit
+                            setTimeout(moveTarget, 200); // Short delay for visual feedback
+
+                            if (gameInstance.winCondition(score) && !coinsAwarded) {
+                                shooterGameMessage.textContent = `Mubarak ho! Aapne ${gameInstance.coinReward} coins jeete!`;
+                                shooterGameMessage.classList.add('text-green-400');
+                                awardCoins(gameInstance.coinReward);
+                                coinsAwarded = true;
+                            }
+                        }
+                    };
+
+                    shooterResetButton.onclick = () => {
+                        stopGame();
+                        target.style.display = 'flex'; // Show target again
+                        startGame();
+                    };
+
+                    // Start the game when the script is loaded (i.e., modal is opened)
+                    startGame();
+                }
+            },
+            {
+                id: 'chess-board',
+                name: 'Chess Board',
+                imageUrl: 'https://placehold.co/400x250/7f8c8d/ffffff?text=Chess+Board',
+                description: 'Ek basic chess board dikhao. (No AI)',
+                type: 'internal',
+                category: ['Board', 'Strategy'],
+                coinReward: 0, // No coins for this as it's not a playable game
+                winCondition: () => false,
+                gameHtml: `
+                    <div class="flex flex-col items-center justify-center p-4">
+                        <div id="chessBoard" class="chess-board"></div>
+                        <p class="text-lg text-gray-300 mt-4 game-message-area">Yeh ek basic chess board hai. Moves abhi support nahi hain.</p>
+                        <div class="game-instructions">
+                            <h4>Kaise Khelein:</h4>
+                            <p>Yeh sirf ek basic chess board hai jismein standard shuruaati pieces set kiye gaye hain. Ismein abhi pieces ko move karna ya game khelna possible nahi hai. Yeh sirf board ko dekhne ke liye hai.</p>
+                            <h4>Controls:</h4>
+                            <ul>
+                                <li>Koi control nahi, sirf dekhne ke liye.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                gameScript: function() {
+                    const chessBoard = document.getElementById('chessBoard');
+                    const pieces = {
+                        'r': '&#9820;', 'n': '&#9822;', 'b': '&#9821;', 'q': '&#9819;', 'k': '&#9818;', 'p': '&#9823;',
+                        'R': '&#9814;', 'N': '&#9816;', 'B': '&#9815;', 'Q': '&#9813;', 'K': '&#9812;', 'P': '&#9817;'
+                    };
+
+                    // Starting FEN position for standard chess
+                    const initialBoardFEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
+
+                    const createChessBoard = () => {
+                        chessBoard.innerHTML = ''; // Clear existing board
+                        let isLightSquare = true;
+                        let rank = 8; // Start from rank 8 for FEN
+
+                        for (const char of initialBoardFEN) {
+                            if (char === '/') {
+                                rank--; // Move to the next rank
+                                isLightSquare = (rank % 2 === 0); // Alternate starting color for next row
+                                continue;
+                            }
+
+                            if (/\d/.test(char)) { // If it's a number, add empty squares
+                                const emptySquares = parseInt(char);
+                                for (let i = 0; i < emptySquares; i++) {
+                                    const square = document.createElement('div');
+                                    square.classList.add('chess-square', isLightSquare ? 'light' : 'dark');
+                                    chessBoard.appendChild(square);
+                                    isLightSquare = !isLightSquare; // Alternate color
+                                }
+                            } else { // It's a piece
+                                const square = document.createElement('div');
+                                square.classList.add('chess-square', isLightSquare ? 'light' : 'dark');
+                                square.innerHTML = pieces[char]; // Use innerHTML for HTML entities
+                                square.classList.add('chess-piece', char === char.toUpperCase() ? 'white-piece' : 'black-piece');
+                                chessBoard.appendChild(square);
+                                isLightSquare = !isLightSquare; // Alternate color
+                            }
+                        }
+                    };
+
+                    // Initial board creation when the game is loaded
+                    createChessBoard();
+                }
+            },
+            {
+                id: 'flappy-bird',
+                name: 'Flappy Bird (Simple)',
+                imageUrl: 'https://placehold.co/400x250/FFD700/000000?text=Flappy+Bird',
+                description: 'Simple Flappy Bird-style game. Tap to fly!',
+                type: 'internal',
+                category: ['Action', 'Casual', 'Arcade'],
+                coinReward: 20,
+                winCondition: (score) => score >= 10, // Win if score is 10 or more
+                gameHtml: `
+                    <div class="game-canvas-container">
+                        <canvas id="flappyCanvas" width="320" height="480" class="border-4 border-gray-700"></canvas>
+                        <p id="flappyScore" class="text-xl font-bold mt-2 mb-4">Score: 0</p>
+                        <div class="canvas-game-controls">
+                            <button id="flappyStartButton">Start Game</button>
+                            <button id="flappyResetButton" class="ml-4">Reset Game</button>
+                        </div>
+                        <p id="flappyGameMessage" class="text-lg mt-4 font-semibold text-gray-300 game-message-area"></p>
+                        <div class="game-instructions">
+                            <h4>Kaise Khelein:</h4>
+                            <p>Bird ko pipes ke beech se nikaal kar score banayein. Pipes ko touch karne ya zameen par girne se game over ho jayega. 10 score banane par aapko ${20} coins milenge!</p>
+                            <h4>Controls:</h4>
+                            <ul>
+                                <li><strong>Mouse Click / Tap:</strong> Bird ko upar udaane ke liye.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                gameScript: function() {
+                    const canvas = document.getElementById('flappyCanvas');
+                    const ctx = canvas.getContext('2d');
+                    const scoreDisplay = document.getElementById('flappyScore');
+                    const startButton = document.getElementById('flappyStartButton');
+                    const resetButton = document.getElementById('flappyResetButton');
+                    const flappyGameMessage = document.getElementById('flappyGameMessage');
+                    const gameInstance = games.find(g => g.id === 'flappy-bird');
+
+                    let bird = { x: 50, y: 150, width: 20, height: 20, gravity: 0.25, velocity: 0, jump: -4.5 };
+                    let pipes = [];
+                    let pipeWidth = 30;
+                    let pipeGap = 120; // Gap between top and bottom pipe
+                    let frame = 0;
+                    let score = 0;
+                    let gameRunning = false;
+                    let gameLoopId;
+                    let coinsAwarded = false;
+
+                    function drawBird() {
+                        ctx.fillStyle = 'yellow';
+                        ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+                    }
+
+                    function drawPipes() {
+                        ctx.fillStyle = 'green';
+                        for (let i = 0; i < pipes.length; i++) {
+                            ctx.fillRect(pipes[i].x, 0, pipeWidth, pipes[i].top);
+                            ctx.fillRect(pipes[i].x, pipes[i].bottom, pipeWidth, canvas.height - pipes[i].bottom);
+                        }
+                    }
+
+                    function updateGameArea() {
+                        if (!gameRunning) return;
+
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                        bird.velocity += bird.gravity;
+                        bird.y += bird.velocity;
+
+                        // Bird collision with ground or ceiling
+                        if (bird.y + bird.height > canvas.height || bird.y < 0) {
+                            endGame();
+                            return;
+                        }
+
+                        // Add new pipes
+                        if (frame % 90 === 0) { // Every 90 frames
+                            let pipeHeight = Math.floor(Math.random() * (canvas.height - pipeGap - 50)) + 20; // Random height for top pipe
+                            pipes.push({ x: canvas.width, top: pipeHeight, bottom: pipeHeight + pipeGap });
+                        }
+
+                        // Move pipes and check for collision
+                        for (let i = 0; i < pipes.length; i++) {
+                            // Check for scoring first, as it depends on current pipe
+                            if (pipes[i].x + pipeWidth < bird.x && !pipes[i].passed) {
+                                score++;
+                                pipes[i].passed = true; // Mark pipe as passed
+                                scoreDisplay.textContent = 'Score: ' + score;
+                                if (gameInstance.winCondition(score) && !coinsAwarded) {
+                                    flappyGameMessage.textContent = `Mubarak ho! Aapne ${gameInstance.coinReward} coins jeete!`;
+                                    flappyGameMessage.classList.add('text-green-400');
+                                    awardCoins(gameInstance.coinReward);
+                                    coinsAwarded = true;
+                                }
+                            }
+
+                            pipes[i].x -= 2; // Move pipe
+
+                            // Collision detection
+                            if (
+                                pipes[i] && // Ensure pipe still exists after potential scoring logic
+                                bird.x < pipes[i].x + pipeWidth &&
+                                bird.x + bird.width > pipes[i].x &&
+                                (bird.y < pipes[i].top || bird.y + bird.height > pipes[i].bottom)
+                            ) {
+                                endGame();
+                                return;
+                            }
+
+                            // Remove off-screen pipes (do this last for the current iteration)
+                            if (pipes[i] && pipes[i].x + pipeWidth < 0) {
+                                pipes.splice(i, 1);
+                                i--; // Decrement i to re-check the current index after splice
+                            }
+                        }
+
+                        drawBird();
+                        drawPipes();
+
+                        frame++;
+                        gameLoopId = requestAnimationFrame(updateGameArea);
+                    }
+
+                    function flap() {
+                        if (gameRunning) {
+                            bird.velocity = bird.jump;
+                        }
+                    }
+
+                    function startGame() {
+                        if (gameRunning) return; // Prevent multiple starts
+                        resetGame(); // Ensure clean state
+                        gameRunning = true;
+                        startButton.disabled = true;
+                        resetButton.disabled = false;
+                        gameLoopId = requestAnimationFrame(updateGameArea);
+                    }
+
+                    function endGame() {
+                        gameRunning = false;
+                        cancelAnimationFrame(gameLoopId);
+                        scoreDisplay.textContent = 'Game Over! Final Score: ' + score;
+                        startButton.disabled = false;
+                        resetButton.disabled = false;
+                    }
+
+                    function resetGame() {
+                        cancelAnimationFrame(gameLoopId); // Stop any running loop
+                        bird = { x: 50, y: 150, width: 20, height: 20, gravity: 0.25, velocity: 0, jump: -4.5 };
+                        pipes = [];
+                        frame = 0;
+                        score = 0;
+                        flappyGameMessage.textContent = '';
+                        flappyGameMessage.classList.remove('text-green-400');
+                        scoreDisplay.textContent = 'Score: 0';
+                        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+                        drawBird(); // Draw bird in initial position
+                        gameRunning = false;
+                        startButton.disabled = false;
+                        resetButton.disabled = true; // Disable reset until game starts
+                        coinsAwarded = false; // Reset coin award status
+                    }
+
+                    // Event listeners
+                    canvas.addEventListener('click', flap);
+                    startButton.addEventListener('click', startGame);
+                    resetButton.addEventListener('click', resetGame);
+
+                    // Initial setup
+                    resetGame();
+                }
+            },
+            {
+                id: 'snake-game',
+                name: 'Snake Game',
+                imageUrl: 'https://placehold.co/400x250/333333/00FF00?text=Snake+Game',
+                description: 'Classic Snake game. Eat food, grow, avoid walls and yourself!',
+                type: 'internal',
+                category: ['Arcade', 'Casual', 'Strategy'],
+                coinReward: 30,
+                winCondition: (score) => score >= 100, // Win if score is 100 or more
+                gameHtml: `
+                    <div class="game-canvas-container">
+                        <canvas id="snakeCanvas" width="400" height="400" class="border-4 border-gray-700"></canvas>
+                        <p id="snakeScore" class="text-xl font-bold mt-2 mb-4">Score: 0</p>
+                        <div class="canvas-game-controls">
+                            <button id="snakeStartButton">Start Game</button>
+                            <button id="snakeResetButton" class="ml-4">Reset Game</button>
+                        </div>
+                        <p id="snakeGameMessage" class="text-lg mt-4 font-semibold text-gray-300 game-message-area"></p>
+                        <div class="game-instructions">
+                            <h4>Kaise Khelein:</h4>
+                            <p>Snake ko control karein aur screen par dikhne wale lal food ko khayein. Food khane se snake lamba ho jayega. Deewaron se ya apni body se takrane par game over ho jayega. 100 score banane par aapko ${30} coins milenge!</p>
+                            <h4>Controls:</h4>
+                            <ul>
+                                <li><strong>Arrow Keys (Up, Down, Left, Right):</strong> Snake ki disha badalne ke liye.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                gameScript: function() {
+                    const canvas = document.getElementById('snakeCanvas');
+                    const ctx = canvas.getContext('2d');
+                    const scoreDisplay = document.getElementById('snakeScore');
+                    const startButton = document.getElementById('snakeStartButton');
+                    const resetButton = document.getElementById('snakeResetButton');
+                    const snakeGameMessage = document.getElementById('snakeGameMessage');
+                    const gameInstance = games.find(g => g.id === 'snake-game');
+
+                    const gridSize = 20; // Size of each snake segment and food
+                    let snake = [{ x: 10, y: 10 }]; // Initial snake position
+                    let food = {};
+                    let dx = 0; // Horizontal velocity
+                    let dy = 0; // Vertical velocity
+                    let score = 0;
+                    let gameRunning = false;
+                    let gameInterval;
+                    let changingDirection = false;
+                    let coinsAwarded = false;
+
+                    function generateFood() {
+                        food = {
+                            x: Math.floor(Math.random() * (canvas.width / gridSize)),
+                            y: Math.floor(Math.random() * (canvas.height / gridSize))
+                        };
+                        // Ensure food doesn't spawn on the snake
+                        for (let i = 0; i < snake.length; i++) {
+                            if (food.x === snake[i].x && food.y === snake[i].y) {
+                                generateFood(); // Recurse if food is on snake
+                            }
+                        }
+                    }
+
+                    function draw() {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+
+                        // Draw food
+                        ctx.fillStyle = 'red';
+                        ctx.strokeStyle = 'darkred';
+                        ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+                        ctx.strokeRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+
+                        // Draw snake
+                        ctx.fillStyle = 'lime';
+                        ctx.strokeStyle = 'darkgreen';
+                        for (let i = 0; i < snake.length; i++) {
+                            ctx.fillRect(snake[i].x * gridSize, snake[i].y * gridSize, gridSize, gridSize);
+                            ctx.strokeRect(snake[i].x * gridSize, snake[i].y * gridSize, gridSize, gridSize);
+                        }
+                    }
+
+                    function advanceSnake() {
+                        if (!gameRunning) return;
+
+                        const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+
+                        // Check for collision with walls
+                        const hitLeftWall = head.x < 0;
+                        const hitRightWall = head.x * gridSize >= canvas.width;
+                        const hitTopWall = head.y < 0;
+                        const hitBottomWall = head.y * gridSize >= canvas.height;
+
+                        // Check for collision with self
+                        const hitSelf = snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y);
+
+                        if (hitLeftWall || hitRightWall || hitTopWall || hitBottomWall || hitSelf) {
+                            endGame();
+                            return;
+                        }
+
+                        snake.unshift(head); // Add new head
+
+                        const didEatFood = head.x === food.x && head.y === food.y;
+                        if (didEatFood) {
+                            score += 10;
+                            scoreDisplay.textContent = 'Score: ' + score;
+                            generateFood(); // Generate new food
+                            if (gameInstance.winCondition(score) && !coinsAwarded) {
+                                snakeGameMessage.textContent = `Mubarak ho! Aapne ${gameInstance.coinReward} coins jeete!`;
+                                snakeGameMessage.classList.add('text-green-400');
+                                awardCoins(gameInstance.coinReward);
+                                coinsAwarded = true;
+                            }
+                        } else {
+                            snake.pop(); // Remove tail if no food eaten
+                        }
+
+                        changingDirection = false; // Allow new direction input
+                        draw();
+                    }
+
+                    function changeDirection(event) {
+                        if (changingDirection || !gameRunning) return;
+
+                        changingDirection = true;
+                        const keyPressed = event.keyCode;
+                        const LEFT_KEY = 37;
+                        const UP_KEY = 38;
+                        const RIGHT_KEY = 39;
+                        const DOWN_KEY = 40;
+
+                        const goingUp = dy === -1;
+                        const goingDown = dy === 1;
+                        const goingLeft = dx === -1;
+                        const goingRight = dx === 1;
+
+                        if (keyPressed === LEFT_KEY && !goingRight) {
+                            dx = -1;
+                            dy = 0;
+                        }
+                        if (keyPressed === UP_KEY && !goingDown) {
+                            dx = 0;
+                            dy = -1;
+                        }
+                        if (keyPressed === RIGHT_KEY && !goingLeft) {
+                            dx = 1;
+                            dy = 0;
+                        }
+                        if (keyPressed === DOWN_KEY && !goingUp) {
+                            dx = 0;
+                            dy = 1;
+                        }
+                    }
+
+                    function startGame() {
+                        if (gameRunning) return;
+                        resetGame(); // Ensure clean state
+                        gameRunning = true;
+                        startButton.disabled = true;
+                        resetButton.disabled = false;
+                        dx = 1; // Start moving right
+                        dy = 0;
+                        generateFood();
+                        draw();
+                        gameInterval = setInterval(advanceSnake, 100); // Game speed
+                    }
+
+                    function endGame() {
+                        gameRunning = false;
+                        clearInterval(gameInterval);
+                        scoreDisplay.textContent = 'Game Over! Final Score: ' + score;
+                        startButton.disabled = false;
+                        resetButton.disabled = false;
+                    }
+
+                    function resetGame() {
+                        clearInterval(gameInterval); // Stop any running loop
+                        snake = [{ x: 10, y: 10 }];
+                        food = {};
+                        dx = 0;
+                        dy = 0;
+                        score = 0;
+                        snakeGameMessage.textContent = '';
+                        snakeGameMessage.classList.remove('text-green-400');
+                        scoreDisplay.textContent = 'Score: 0';
+                        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+                        gameRunning = false;
+                        startButton.disabled = false;
+                        resetButton.disabled = true;
+                        draw(); // Draw initial snake
+                        coinsAwarded = false; // Reset coin award status
+                    }
+
+                    // Event listeners
+                    document.addEventListener('keydown', changeDirection);
+                    startButton.addEventListener('click', startGame);
+                    resetButton.addEventListener('click', resetGame);
+
+                    // Initial setup
+                    resetGame();
+                }
+            },
+            {
+                id: 'space-shooter',
+                name: 'Space Shooter (Simple)',
+                imageUrl: 'https://placehold.co/400x250/000080/FFFFFF?text=Space+Shooter',
+                description: 'Shoot falling asteroids in space!',
+                type: 'internal',
+                category: ['Action', 'Shooter', 'Arcade'],
+                coinReward: 35,
+                winCondition: (score) => score >= 100,
+                gameHtml: `
+                    <div class="game-canvas-container">
+                        <canvas id="shooterCanvas" width="400" height="500" class="border-4 border-gray-700"></canvas>
+                        <p id="shooterGameScore" class="text-xl font-bold mt-2 mb-4">Score: 0</p>
+                        <div class="canvas-game-controls">
+                            <button id="shooterGameStartButton">Start Game</button>
+                            <button id="shooterGameResetButton" class="ml-4">Reset Game</button>
+                        </div>
+                        <p id="spaceShooterGameMessage" class="text-lg mt-4 font-semibold text-gray-300 game-message-area"></p>
+                        <div class="game-instructions">
+                            <h4>Kaise Khelein:</h4>
+                            <p>Apne spaceship ko control karein aur upar se girte hue asteroids ko shoot karke tod dein. Asteroids se takrane par game over ho jayega. Jitne zyada asteroids todoge, utna zyada score banega. 100 score banane par aapko ${35} coins milenge!</p>
+                            <h4>Controls:</h4>
+                            <ul>
+                                <li><strong>Left Arrow:</strong> Spaceship ko left move karne ke liye.</li>
+                                <li><strong>Right Arrow:</strong> Spaceship ko right move karne ke liye.</li>
+                                <li><strong>Spacebar:</strong> Shoot karne ke liye.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                gameScript: function() {
+                    const canvas = document.getElementById('shooterCanvas');
+                    const ctx = canvas.getContext('2d');
+                    const scoreDisplay = document.getElementById('shooterGameScore');
+                    const startButton = document.getElementById('shooterGameStartButton');
+                    const resetButton = document.getElementById('shooterGameResetButton');
+                    const spaceShooterGameMessage = document.getElementById('spaceShooterGameMessage');
+                    const gameInstance = games.find(g => g.id === 'space-shooter');
+
+                    let player = { x: canvas.width / 2 - 15, y: canvas.height - 40, width: 30, height: 30, speed: 5 };
+                    let bullets = [];
+                    let asteroids = [];
+                    let score = 0;
+                    let gameRunning = false;
+                    let gameLoopInterval;
+                    let keys = {}; // To track pressed keys
+                    let coinsAwarded = false;
+
+                    // Event listeners for player movement and shooting
+                    document.addEventListener('keydown', (e) => { keys[e.key] = true; });
+                    document.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+                    function drawPlayer() {
+                        ctx.fillStyle = 'blue';
+                        ctx.fillRect(player.x, player.y, player.width, player.height);
+                    }
+
+                    function drawBullets() {
+                        ctx.fillStyle = 'yellow';
+                        for (let i = 0; i < bullets.length; i++) {
+                            ctx.fillRect(bullets[i].x, bullets[i].y, bullets[i].width, bullets[i].height);
+                        }
+                    }
+
+                    function drawAsteroids() {
+                        ctx.fillStyle = 'gray';
+                        for (let i = 0; i < asteroids.length; i++) {
+                            ctx.beginPath();
+                            ctx.arc(asteroids[i].x, asteroids[i].y, asteroids[i].radius, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+
+                    function updateGame() {
+                        if (!gameRunning) return;
+
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                        // Player movement
+                        if (keys['ArrowLeft'] && player.x > 0) {
+                            player.x -= player.speed;
+                        }
+                        if (keys['ArrowRight'] && player.x + player.width < canvas.width) {
+                            player.x += player.speed;
+                        }
+                        // Shooting
+                        if (keys[' '] && !player.isShooting) { // Spacebar
+                            bullets.push({ x: player.x + player.width / 2 - 2, y: player.y, width: 4, height: 10, speed: 7 });
+                            player.isShooting = true; // Prevent rapid fire
+                            setTimeout(() => player.isShooting = false, 200); // Cooldown
+                        }
+
+                        // Update bullets
+                        for (let i = 0; i < bullets.length; i++) {
+                            bullets[i].y -= bullets[i].speed;
+                            if (bullets[i].y < 0) {
+                                bullets.splice(i, 1);
+                                i--;
+                            }
+                        }
+
+                        // Generate asteroids
+                        if (Math.random() < 0.02) { // Chance to spawn asteroid
+                            asteroids.push({
+                                x: Math.random() * canvas.width,
+                                y: 0,
+                                radius: Math.random() * 15 + 10, // Random size
+                                speed: Math.random() * 2 + 1
+                            });
+                        }
+
+                        // Update asteroids and check for collisions
+                        for (let i = 0; i < asteroids.length; i++) {
+                            // Ensure asteroid exists before processing it, especially after potential splice from bullet collision
+                            if (!asteroids[i]) {
+                                continue;
+                            }
+
+                            asteroids[i].y += asteroids[i].speed;
+
+                            // Collision with player
+                            if (player.x < asteroids[i].x + asteroids[i].radius &&
+                                player.x + player.width > asteroids[i].x - asteroids[i].radius &&
+                                player.y < asteroids[i].y + asteroids[i].radius &&
+                                player.y + player.height > asteroids[i].y - asteroids[i].radius) {
+                                endGame();
+                                return;
+                            }
+
+                            // Collision with bullets
+                            for (let j = 0; j < bullets.length; j++) {
+                                // Ensure bullet and asteroid exist before checking collision
+                                if (!bullets[j] || !asteroids[i]) continue;
+
+                                const dist = Math.sqrt(
+                                    Math.pow(asteroids[i].x - (bullets[j].x + bullets[j].width / 2), 2) +
+                                    Math.pow(asteroids[i].y - (bullets[j].y + bullets[j].height / 2), 2)
+                                );
+                                if (dist < asteroids[i].radius) {
+                                    // Hit! Remove asteroid and bullet
+                                    asteroids.splice(i, 1);
+                                    bullets.splice(j, 1);
+                                    score += 10;
+                                    scoreDisplay.textContent = 'Score: ' + score;
+                                    if (gameInstance.winCondition(score) && !coinsAwarded) {
+                                        spaceShooterGameMessage.textContent = `Mubarak ho! Aapne ${gameInstance.coinReward} coins jeete!`;
+                                        spaceShooterGameMessage.classList.add('text-green-400');
+                                        awardCoins(gameInstance.coinReward);
+                                        coinsAwarded = true;
+                                    }
+                                    i--; // Adjust index for outer loop after asteroid removal
+                                    j--; // Adjust index for inner loop after bullet removal
+                                    break; // Only one bullet can hit one asteroid, break inner loop
+                                }
+                            }
+
+                            // After potential splice, check if asteroid still exists before checking if it's off-screen
+                            if (asteroids[i] && asteroids[i].y > canvas.height) {
+                                asteroids.splice(i, 1);
+                                i--; // Adjust index after removal
+                            }
+                        }
+
+                        drawPlayer();
+                        drawBullets();
+                        drawAsteroids();
+                    }
+
+                    function startGame() {
+                        if (gameRunning) return;
+                        resetGame(); // Ensure clean state
+                        gameRunning = true;
+                        startButton.disabled = true;
+                        resetButton.disabled = false;
+                        gameLoopInterval = setInterval(updateGame, 1000 / 60); // 60 FPS
+                    }
+
+                    function endGame() {
+                        gameRunning = false;
+                        clearInterval(gameLoopInterval);
+                        scoreDisplay.textContent = 'Game Over! Final Score: ' + score;
+                        startButton.disabled = false;
+                        resetButton.disabled = false;
+                    }
+
+                    function resetGame() {
+                        clearInterval(gameLoopInterval);
+                        player = { x: canvas.width / 2 - 15, y: canvas.height - 40, width: 30, height: 30, speed: 5 };
+                        bullets = [];
+                        asteroids = [];
+                        score = 0;
+                        spaceShooterGameMessage.textContent = '';
+                        spaceShooterGameMessage.classList.remove('text-green-400');
+                        scoreDisplay.textContent = 'Score: 0';
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        drawPlayer();
+                        gameRunning = false;
+                        startButton.disabled = false;
+                        resetButton.disabled = true;
+                        coinsAwarded = false; // Reset coin award status
+                    }
+
+                    startButton.addEventListener('click', startGame);
+                    resetButton.addEventListener('click', resetGame);
+
+                    // Initial setup
+                    resetGame();
+                }
+            },
+            {
+                id: 'simple-racing',
+                name: 'Simple Racing Game',
+                imageUrl: 'https://placehold.co/400x250/8B4513/FFFFFF?text=Racing+Game',
+                description: 'Obstacles se bachkar score banao!',
+                type: 'internal',
+                category: ['Racing', 'Action', 'New Games'],
+                coinReward: 25,
+                winCondition: (score) => score >= 100,
+                gameHtml: `
+                    <div class="game-canvas-container">
+                        <canvas id="racingCanvas" width="300" height="500" class="border-4 border-gray-700"></canvas>
+                        <p id="racingScore" class="text-xl font-bold mt-2 mb-4">Score: 0</p>
+                        <div class="canvas-game-controls">
+                            <button id="racingStartButton">Start Game</a></button>
+                            <button id="racingResetButton" class="ml-4">Reset Game</button>
+                        </div>
+                        <p id="racingGameMessage" class="text-lg mt-4 font-semibold text-gray-300 game-message-area"></p>
+                        <div class="game-instructions">
+                            <h4>Kaise Khelein:</h4>
+                            <p>Apni car ko left aur right move karein taaki upar se aane wale obstacles se bach sakein. Har obstacle se bachne par score badhega. Obstacle se takrane par game over ho jayega. 100 score banane par aapko ${25} coins milenge!</p>
+                            <h4>Controls:</h4>
+                            <ul>
+                                <li><strong>Left Arrow:</strong> Car ko left move karne ke liye.</li>
+                                <li><strong>Right Arrow:</strong> Car ko right move karne ke liye.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                gameScript: function() {
+                    const canvas = document.getElementById('racingCanvas');
+                    const ctx = canvas.getContext('2d');
+                    const scoreDisplay = document.getElementById('racingScore');
+                    const startButton = document.getElementById('racingStartButton');
+                    const resetButton = document.getElementById('racingResetButton');
+                    const racingGameMessage = document.getElementById('racingGameMessage');
+                    const gameInstance = games.find(g => g.id === 'simple-racing');
+
+                    let player = { x: canvas.width / 2 - 25, y: canvas.height - 70, width: 50, height: 80, speed: 5 };
+                    let obstacles = [];
+                    let score = 0;
+                    let gameRunning = false;
+                    let gameLoopInterval;
+                    let keys = {}; // To track pressed keys
+                    let coinsAwarded = false;
+
+                    // Event listeners for player movement
+                    document.addEventListener('keydown', (e) => { keys[e.key] = true; });
+                    document.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+                    function drawPlayer() {
+                        ctx.fillStyle = 'blue';
+                        ctx.fillRect(player.x, player.y, player.width, player.height);
+                    }
+
+                    function drawObstacles() {
+                        ctx.fillStyle = 'red';
+                        for (let i = 0; i < obstacles.length; i++) {
+                            ctx.fillRect(obstacles[i].x, obstacles[i].y, obstacles[i].width, obstacles[i].height);
+                        }
+                    }
+
+                    function updateGame() {
+                        if (!gameRunning) return;
+
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                        // Player movement
+                        if (keys['ArrowLeft'] && player.x > 0) {
+                            player.x -= player.speed;
+                        }
+                        if (keys['ArrowRight'] && player.x + player.width < canvas.width) {
+                            player.x += player.speed;
+                        }
+
+                        // Generate obstacles
+                        if (Math.random() < 0.03) { // Chance to spawn obstacle
+                            obstacles.push({
+                                x: Math.random() * (canvas.width - 50),
+                                y: -50,
+                                width: 40,
+                                height: 60,
+                                speed: Math.random() * 2 + 2
+                            });
+                        }
+
+                        // Update obstacles and check for collisions
+                        for (let i = 0; i < obstacles.length; i++) {
+                            // Ensure obstacle exists before processing it
+                            if (!obstacles[i]) {
+                                continue;
+                            }
+
+                            obstacles[i].y += obstacles[i].speed;
+
+                            // Collision detection (AABB collision)
+                            if (player.x < obstacles[i].x + obstacles[i].width &&
+                                player.x + player.width > obstacles[i].x &&
+                                player.y < obstacles[i].y + obstacles[i].height &&
+                                player.y + player.height > obstacles[i].y) {
+                                endGame();
+                                return;
+                            }
+
+                            if (obstacles[i].y > canvas.height) {
+                                obstacles.splice(i, 1);
+                                i--; // Adjust index after removal
+                                score += 10; // Score for avoiding an obstacle
+                                scoreDisplay.textContent = 'Score: ' + score;
+                                if (gameInstance.winCondition(score) && !coinsAwarded) {
+                                    racingGameMessage.textContent = `Mubarak ho! Aapne ${gameInstance.coinReward} coins jeete!`;
+                                    racingGameMessage.classList.add('text-green-400');
+                                    awardCoins(gameInstance.coinReward);
+                                    coinsAwarded = true;
+                                }
+                            }
+                        }
+
+                        drawPlayer();
+                        drawObstacles();
+                    }
+
+                    function startGame() {
+                        if (gameRunning) return;
+                        resetGame(); // Ensure clean state
+                        gameRunning = true;
+                        startButton.disabled = true;
+                        resetButton.disabled = false;
+                        gameLoopInterval = setInterval(updateGame, 1000 / 60); // 60 FPS
+                    }
+
+                    function endGame() {
+                        gameRunning = false;
+                        clearInterval(gameLoopInterval);
+                        scoreDisplay.textContent = 'Game Over! Final Score: ' + score;
+                        startButton.disabled = false;
+                        resetButton.disabled = false;
+                    }
+
+                    function resetGame() {
+                        clearInterval(gameLoopInterval);
+                        player = { x: canvas.width / 2 - 25, y: canvas.height - 70, width: 50, height: 80, speed: 5 };
+                        obstacles = [];
+                        score = 0;
+                        racingGameMessage.textContent = '';
+                        racingGameMessage.classList.remove('text-green-400');
+                        scoreDisplay.textContent = 'Score: 0';
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        drawPlayer();
+                        gameRunning = false;
+                        startButton.disabled = false;
+                        resetButton.disabled = true;
+                        coinsAwarded = false; // Reset coin award status
+                    }
+
+                    startButton.addEventListener('click', startGame);
+                    resetButton.addEventListener('click', resetGame);
+
+                    // Initial setup
+                    resetGame();
+                }
+            },
+            {
+                id: 'pong-game',
+                name: 'Pong Game',
+                imageUrl: 'https://placehold.co/400x250/008080/FFFFFF?text=Pong+Game',
+                description: 'Classic arcade Pong! (Player vs Player)',
+                type: 'internal',
+                category: ['Arcade', 'Sports', 'Multiplayer'],
+                coinReward: 20, // Coins for winning player
+                winCondition: (playerScore, opponentScore) => playerScore >= 5, // First to 5 points wins
+                gameHtml: `
+                    <div class="game-canvas-container">
+                        <canvas id="pongCanvas" width="400" height="300" class="border-4 border-gray-700"></canvas>
+                        <p class="text-xl font-bold mt-2 mb-4">Score: <span id="player1Score">0</span> - <span id="player2Score">0</span></p>
+                        <div class="canvas-game-controls">
+                            <button id="pongStartButton">Start Game</button>
+                            <button id="pongResetButton" class="ml-4">Reset Game</button>
+                        </div>
+                        <p id="pongGameMessage" class="text-lg mt-4 font-semibold text-gray-300 game-message-area"></p>
+                        <div class="game-instructions">
+                            <h4>Kaise Khelein:</h4>
+                            <p>Yeh ek 2-player game hai. Har player apne paddle ko control karta hai aur ball ko dusre player ke paas se nikalne ki koshish karta hai. Jab ball ek player ke paddle se chhoot jaati hai, toh dusre player ko point milta hai. Jo player pehle 5 points banayega, woh jeet jayega aur ${20} coins milenge!</p>
+                            <h4>Controls:</h4>
+                            <ul>
+                                <li><strong>Player 1 (Left Paddle):</strong> 'W' (upar), 'S' (neeche).</li>
+                                <li><strong>Player 2 (Right Paddle):</strong> 'Up Arrow' (upar), 'Down Arrow' (neeche).</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                gameScript: function() {
+                    const canvas = document.getElementById('pongCanvas');
+                    const ctx = canvas.getContext('2d');
+                    const player1ScoreDisplay = document.getElementById('player1Score');
+                    const player2ScoreDisplay = document.getElementById('player2Score');
+                    const startButton = document.getElementById('pongStartButton');
+                    const resetButton = document.getElementById('pongResetButton');
+                    const pongGameMessage = document.getElementById('pongGameMessage');
+                    const gameInstance = games.find(g => g.id === 'pong-game');
+
+                    let player1 = { x: 10, y: canvas.height / 2 - 30, width: 10, height: 60, score: 0, speed: 4 };
+                    let player2 = { x: canvas.width - 20, y: canvas.height / 2 - 30, width: 10, height: 60, score: 0, speed: 4 };
+                    let ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 7, dx: 3, dy: 3 };
+                    let gameRunning = false;
+                    let gameLoopInterval;
+                    let keys = {};
+                    let coinsAwarded = { player1: false, player2: false };
+
+                    document.addEventListener('keydown', (e) => { keys[e.key] = true; });
+                    document.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+                    function draw() {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.fillStyle = 'white';
+
+                        // Draw paddles
+                        ctx.fillRect(player1.x, player1.y, player1.width, player1.height);
+                        ctx.fillRect(player2.x, player2.y, player2.width, player2.height);
+
+                        // Draw ball
+                        ctx.beginPath();
+                        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    function updateGame() {
+                        if (!gameRunning) return;
+
+                        // Player 1 movement (W/S)
+                        if (keys['w'] && player1.y > 0) {
+                            player1.y -= player1.speed;
+                        }
+                        if (keys['s'] && player1.y + player1.height < canvas.height) {
+                            player1.y += player1.speed;
+                        }
+
+                        // Player 2 movement (Up/Down Arrows)
+                        if (keys['ArrowUp'] && player2.y > 0) {
+                            player2.y -= player2.speed;
+                        }
+                        if (keys['ArrowDown'] && player2.y + player2.height < canvas.height) {
+                            player2.y += player2.speed;
+                        }
+
+                        // Ball movement
+                        ball.x += ball.dx;
+                        ball.y += ball.dy;
+
+                        // Ball collision with top/bottom walls
+                        if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+                            ball.dy *= -1; // Reverse vertical direction
+                        }
+
+                        // Ball collision with paddles
+                        // Player 1 paddle
+                        if (ball.x - ball.radius < player1.x + player1.width &&
+                            ball.y > player1.y && ball.y < player1.y + player1.height) {
+                            ball.dx *= -1; // Reverse horizontal direction
+                            ball.x = player1.x + player1.width + ball.radius; // Prevent sticking
+                        }
+                        // Player 2 paddle
+                        if (ball.x + ball.radius > player2.x &&
+                            ball.y > player2.y && ball.y < player2.y + player2.height) {
+                            ball.dx *= -1; // Reverse horizontal direction
+                            ball.x = player2.x - ball.radius; // Prevent sticking
+                        }
+
+                        // Ball out of bounds (scoring)
+                        if (ball.x - ball.radius < 0) { // Player 2 scores
+                            player2.score++;
+                            player2ScoreDisplay.textContent = player2.score;
+                            if (gameInstance.winCondition(player2.score, player1.score)) {
+                                pongGameMessage.textContent = `Player 2 jeet gaya! 🎉 Aapko ${gameInstance.coinReward} coins mile!`;
+                                pongGameMessage.classList.add('text-green-400');
+                                awardCoins(gameInstance.coinReward);
+                                endGame();
+                            } else {
+                                resetBall();
+                            }
+                        } else if (ball.x + ball.radius > canvas.width) { // Player 1 scores
+                            player1.score++;
+                            player1ScoreDisplay.textContent = player1.score;
+                            if (gameInstance.winCondition(player1.score, player2.score)) {
+                                pongGameMessage.textContent = `Player 1 jeet gaya! 🎉 Aapko ${gameInstance.coinReward} coins mile!`;
+                                pongGameMessage.classList.add('text-green-400');
+                                awardCoins(gameInstance.coinReward);
+                                endGame();
+                            } else {
+                                resetBall();
+                            }
+                        }
+
+                        draw();
+                    }
+
+                    function resetBall() {
+                        ball.x = canvas.width / 2;
+                        ball.y = canvas.height / 2;
+                        ball.dx = (Math.random() > 0.5 ? 1 : -1) * 3; // Random initial direction
+                        ball.dy = (Math.random() > 0.5 ? 1 : -1) * 3;
+                    }
+
+                    function startGame() {
+                        if (gameRunning) return;
+                        resetGame();
+                        gameRunning = true;
+                        startButton.disabled = true;
+                        resetButton.disabled = false;
+                        pongGameMessage.textContent = '';
+                        pongGameMessage.classList.remove('text-green-400');
+                        gameLoopInterval = setInterval(updateGame, 1000 / 60); // 60 FPS
+                    }
+
+                    function endGame() {
+                        gameRunning = false;
+                        clearInterval(gameLoopInterval);
+                        startButton.disabled = false;
+                        resetButton.disabled = false;
+                    }
+
+                    function resetGame() {
+                        clearInterval(gameLoopInterval);
+                        player1 = { x: 10, y: canvas.height / 2 - 30, width: 10, height: 60, score: 0, speed: 4 };
+                        player2 = { x: canvas.width - 20, y: canvas.height / 2 - 30, width: 10, height: 60, score: 0, speed: 4 };
+                        ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 7, dx: 3, dy: 3 };
+                        player1ScoreDisplay.textContent = '0';
+                        player2ScoreDisplay.textContent = '0';
+                        pongGameMessage.textContent = '';
+                        pongGameMessage.classList.remove('text-green-400');
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        draw();
+                        gameRunning = false;
+                        startButton.disabled = false;
+                        resetButton.disabled = true;
+                        coinsAwarded = { player1: false, player2: false }; // Reset coin award status
+                    }
+
+                    startButton.addEventListener('click', startGame);
+                    resetButton.addEventListener('click', resetGame);
+
+                    resetGame();
+                }
+            },
+            {
+                id: 'brick-breaker',
+                name: 'Brick Breaker',
+                imageUrl: 'https://placehold.co/400x250/FF4500/FFFFFF?text=Brick+Breaker',
+                description: 'Paddle se ball ko bounce karke bricks todo!',
+                type: 'internal',
+                category: ['Arcade', 'Puzzle'],
+                coinReward: 40,
+                winCondition: (bricksRemaining) => bricksRemaining === 0,
+                gameHtml: `
+                    <div class="game-canvas-container">
+                        <canvas id="brickBreakerCanvas" width="480" height="320" class="border-4 border-gray-700"></canvas>
+                        <p id="brickBreakerScore" class="text-xl font-bold mt-2 mb-4">Score: 0</p>
+                        <div class="canvas-game-controls">
+                            <button id="brickBreakerStartButton">Start Game</button>
+                            <button id="brickBreakerResetButton" class="ml-4">Reset Game</button>
+                        </div>
+                        <p id="brickBreakerGameMessage" class="text-lg mt-4 font-semibold text-gray-300 game-message-area"></p>
+                        <div class="game-instructions">
+                            <h4>Kaise Khelein:</h4>
+                            <p>Paddle ko control karein aur ball ko upar ki taraf bounce karein taaki woh bricks ko tod sake. Saare bricks todne par aap jeet jaayenge aur ${40} coins milenge! Agar ball neeche gir jaati hai, toh game over.</p>
+                            <h4>Controls:</h4>
+                            <ul>
+                                <li><strong>Left Arrow:</strong> Paddle ko left move karne ke liye.</li>
+                                <li><strong>Right Arrow:</strong> Paddle ko right move karne ke liye.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                gameScript: function() {
+                    const canvas = document.getElementById('brickBreakerCanvas');
+                    const ctx = canvas.getContext('2d');
+                    const scoreDisplay = document.getElementById('brickBreakerScore');
+                    const startButton = document.getElementById('brickBreakerStartButton');
+                    const resetButton = document.getElementById('brickBreakerResetButton');
+                    const brickBreakerGameMessage = document.getElementById('brickBreakerGameMessage');
+                    const gameInstance = games.find(g => g.id === 'brick-breaker');
+
+                    let ball = { x: canvas.width / 2, y: canvas.height - 30, radius: 10, dx: 2, dy: -2 };
+                    let paddle = { x: canvas.width / 2 - 40, y: canvas.height - 20, width: 80, height: 10, speed: 7 };
+                    let bricks = [];
+                    let brickRowCount = 5;
+                    let brickColumnCount = 8;
+                    let brickWidth = 50;
+                    let brickHeight = 15;
+                    let brickPadding = 5;
+                    let brickOffsetTop = 30;
+                    let brickOffsetLeft = 20;
+                    let score = 0;
+                    let gameRunning = false;
+                    let gameLoopInterval;
+                    let rightPressed = false;
+                    let leftPressed = false;
+                    let coinsAwarded = false;
+
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Right' || e.key === 'ArrowRight') rightPressed = true;
+                        else if (e.key === 'Left' || e.key === 'ArrowLeft') leftPressed = true;
+                    });
+                    document.addEventListener('keyup', (e) => {
+                        if (e.key === 'Right' || e.key === 'ArrowRight') rightPressed = false;
+                        else if (e.key === 'Left' || e.key === 'ArrowLeft') leftPressed = false;
+                    });
+
+                    function createBricks() {
+                        bricks = [];
+                        for (let c = 0; c < brickColumnCount; c++) {
+                            bricks[c] = [];
+                            for (let r = 0; r < brickRowCount; r++) {
+                                bricks[c][r] = { x: 0, y: 0, status: 1 }; // status 1 means active
+                            }
+                        }
+                    }
+
+                    function drawBricks() {
+                        for (let c = 0; c < brickColumnCount; c++) {
+                            for (let r = 0; r < brickRowCount; r++) {
+                                if (bricks[c][r].status === 1) {
+                                    let brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
+                                    let brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
+                                    bricks[c][r].x = brickX;
+                                    bricks[c][r].y = brickY;
+                                    ctx.fillStyle = '#0095DD'; // Blue bricks
+                                    ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+                                }
+                            }
+                        }
+                    }
+
+                    function drawBall() {
+                        ctx.beginPath();
+                        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = '#0095DD';
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+
+                    function drawPaddle() {
+                        ctx.fillStyle = '#0095DD';
+                        ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+                    }
+
+                    function collisionDetection() {
+                        let activeBricks = 0;
+                        for (let c = 0; c < brickColumnCount; c++) {
+                            for (let r = 0; r < brickRowCount; r++) {
+                                let b = bricks[c][r];
+                                if (b.status === 1) {
+                                    activeBricks++;
+                                    if (ball.x + ball.radius > b.x && ball.x - ball.radius < b.x + brickWidth &&
+                                        ball.y + ball.radius > b.y && ball.y - ball.radius < b.y + brickHeight) {
+                                        ball.dy *= -1; // Reverse ball direction
+                                        b.status = 0; // Mark brick as hit
+                                        score += 10;
+                                        scoreDisplay.textContent = 'Score: ' + score;
+                                    }
+                                }
+                            }
+                        }
+                        if (gameInstance.winCondition(activeBricks) && !coinsAwarded) {
+                            brickBreakerGameMessage.textContent = `Mubarak ho! Aapne saare bricks tod diye! 🎉 Aapne ${gameInstance.coinReward} coins jeete!`;
+                            brickBreakerGameMessage.classList.add('text-green-400');
+                            awardCoins(gameInstance.coinReward);
+                            coinsAwarded = true;
+                            endGame();
+                        }
+                    }
+
+                    function updateGame() {
+                        if (!gameRunning) return;
+
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        drawBricks();
+                        drawBall();
+                        drawPaddle();
+                        collisionDetection();
+
+                        // Ball movement
+                        ball.x += ball.dx;
+                        ball.y += ball.dy;
+
+                        // Ball collision with walls
+                        if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
+                            ball.dx *= -1;
+                        }
+                        if (ball.y - ball.radius < 0) { // Top wall
+                            ball.dy *= -1;
+                        } else if (ball.y + ball.radius > canvas.height - paddle.height) { // Bottom wall (paddle area)
+                            if (ball.x > paddle.x && ball.x < paddle.x + paddle.width) { // Collision with paddle
+                                ball.dy *= -1;
+                            } else { // Ball missed paddle
+                                endGame();
+                                return;
+                            }
+                        }
+
+                        // Paddle movement
+                        if (rightPressed && paddle.x + paddle.width < canvas.width) {
+                            paddle.x += paddle.speed;
+                        } else if (leftPressed && paddle.x > 0) {
+                            paddle.x -= paddle.speed;
+                        }
+                    }
+
+                    function startGame() {
+                        if (gameRunning) return;
+                        resetGame();
+                        gameRunning = true;
+                        startButton.disabled = true;
+                        resetButton.disabled = false;
+                        brickBreakerGameMessage.textContent = '';
+                        brickBreakerGameMessage.classList.remove('text-green-400');
+                        gameLoopInterval = setInterval(updateGame, 1000 / 60); // 60 FPS
+                    }
+
+                    function endGame() {
+                        gameRunning = false;
+                        clearInterval(gameLoopInterval);
+                        scoreDisplay.textContent = 'Game Over! Final Score: ' + score;
+                        startButton.disabled = false;
+                        resetButton.disabled = false;
+                    }
+
+                    function resetGame() {
+                        clearInterval(gameLoopInterval);
+                        ball = { x: canvas.width / 2, y: canvas.height - 30, radius: 10, dx: 2, dy: -2 };
+                        paddle = { x: canvas.width / 2 - 40, y: canvas.height - 20, width: 80, height: 10, speed: 7 };
+                        score = 0;
+                        brickBreakerGameMessage.textContent = '';
+                        brickBreakerGameMessage.classList.remove('text-green-400');
+                        scoreDisplay.textContent = 'Score: 0';
+                        createBricks(); // Recreate bricks
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        drawBricks();
+                        drawBall();
+                        drawPaddle();
+                        gameRunning = false;
+                        startButton.disabled = false;
+                        resetButton.disabled = true;
+                        coinsAwarded = false; // Reset coin award status
+                    }
+
+                    startButton.addEventListener('click', startGame);
+                    resetButton.addEventListener('click', resetGame);
+
+                    resetGame(); // Initial draw
+                }
+            },
+            {
+                id: 'whack-a-mole',
+                name: 'Whack-A-Mole',
+                imageUrl: 'https://placehold.co/400x250/8A2BE2/FFFFFF?text=Whack-A-Mole',
+                description: 'Moles ko pakdo aur score banao!',
+                type: 'internal',
+                category: ['Arcade', 'Casual', 'New Games'],
+                coinReward: 30,
+                winCondition: (score) => score >= 20, // Win if score is 20 or more
+                gameHtml: `
+                    <div class="game-canvas-container">
+                        <canvas id="whackCanvas" width="400" height="400" class="border-4 border-gray-700"></canvas>
+                        <p id="whackScore" class="text-xl font-bold mt-2 mb-4">Score: 0 | Time: 30</p>
+                        <div class="canvas-game-controls">
+                            <button id="whackStartButton">Start Game</button>
+                            <button id="whackResetButton" class="ml-4">Reset Game</button>
+                        </div>
+                        <p id="whackGameMessage" class="text-lg mt-4 font-semibold text-gray-300 game-message-area"></p>
+                        <div class="game-instructions">
+                            <h4>Kaise Khelein:</h4>
+                            <p>Moles (holes se nikalne wale targets) par click karein jab woh dikhein. Jitni jaldi click karenge, utne points milenge. Agar aap mole ko miss karte hain ya woh wapas chala jaata hai, toh score nahi milega. 30 seconds mein 20 ya usse zyada score banane par aapko ${30} coins milenge!</p>
+                            <h4>Controls:</h4>
+                            <ul>
+                                <li><strong>Mouse Click:</strong> Moles par click karne ke liye.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                gameScript: function() {
+                    const canvas = document.getElementById('whackCanvas');
+                    const ctx = canvas.getContext('2d');
+                    const scoreDisplay = document.getElementById('whackScore');
+                    const startButton = document.getElementById('whackStartButton');
+                    const resetButton = document.getElementById('whackResetButton');
+                    const whackGameMessage = document.getElementById('whackGameMessage');
+                    const gameInstance = games.find(g => g.id === 'whack-a-mole');
+
+                    let moles = [];
+                    let score = 0;
+                    let gameRunning = false;
+                    let gameTimer;
+                    const gameDuration = 30; // seconds
+                    let timeLeft = gameDuration;
+                    let coinsAwarded = false;
+
+                    const moleRadius = 30;
+                    const holeColor = '#4a5568'; // Dark gray
+                    const moleColor = '#9a3412'; // Brownish
+
+                    function createHoles() {
+                        // Create a grid of holes
+                        moles = [];
+                        const rows = 3;
+                        const cols = 3;
+                        const padding = 50;
+                        const spacingX = (canvas.width - 2 * padding) / (cols - 1);
+                        const spacingY = (canvas.height - 2 * padding) / (rows - 1);
+
+                        for (let r = 0; r < rows; r++) {
+                            for (let c = 0; c < cols; c++) {
+                                moles.push({
+                                    x: padding + c * spacingX,
+                                    y: padding + r * spacingY,
+                                    radius: moleRadius,
+                                    isUp: false,
+                                    hit: false
+                                });
+                            }
+                        }
+                    }
+
+                    function drawGame() {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.fillStyle = holeColor;
+
+                        moles.forEach(mole => {
+                            ctx.beginPath();
+                            ctx.arc(mole.x, mole.y, mole.radius, 0, Math.PI * 2);
+                            ctx.fill();
+
+                            if (mole.isUp) {
+                                ctx.fillStyle = mole.hit ? 'green' : moleColor; // Green if hit
+                                ctx.beginPath();
+                                ctx.arc(mole.x, mole.y, mole.radius * 0.8, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                        });
+                    }
+
+                    function popUpMole() {
+                        if (!gameRunning) return;
+
+                        // Hide all moles first
+                        moles.forEach(mole => {
+                            mole.isUp = false;
+                            mole.hit = false;
+                        });
+
+                        // Choose a random mole to pop up
+                        const randomIndex = Math.floor(Math.random() * moles.length);
+                        moles[randomIndex].isUp = true;
+
+                        drawGame();
+
+                        // Mole stays up for a random duration (e.g., 1 to 2 seconds)
+                        setTimeout(() => {
+                            if (moles[randomIndex].isUp && !moles[randomIndex].hit) {
+                                moles[randomIndex].isUp = false; // Mole goes down if not hit
+                                drawGame();
+                            }
+                            if (gameRunning) {
+                                popUpMole(); // Pop up next mole
+                            }
+                        }, Math.random() * 1000 + 1000); // 1 to 2 seconds
+                    }
+
+                    function handleCanvasClick(event) {
+                        if (!gameRunning) return;
+
+                        const rect = canvas.getBoundingClientRect();
+                        const clickX = event.clientX - rect.left;
+                        const clickY = event.clientY - rect.top;
+
+                        moles.forEach(mole => {
+                            if (mole.isUp && !mole.hit) {
+                                const dist = Math.sqrt(Math.pow(clickX - mole.x, 2) + Math.pow(clickY - mole.y, 2));
+                                if (dist < mole.radius) {
+                                    mole.hit = true;
+                                    score += 1;
+                                    scoreDisplay.textContent = 'Score: ' + score + ' | Time: ' + timeLeft;
+                                    drawGame(); // Redraw immediately to show hit color
+                                }
+                            }
+                        });
+                    }
+
+                    function startGame() {
+                        if (gameRunning) return;
+                        resetGame(); // Ensure clean state
+                        gameRunning = true;
+                        startButton.disabled = true;
+                        resetButton.disabled = false;
+                        timeLeft = gameDuration;
+                        scoreDisplay.textContent = 'Score: 0 | Time: ' + timeLeft;
+                        whackGameMessage.textContent = '';
+                        whackGameMessage.classList.remove('text-green-400');
+                        coinsAwarded = false;
+
+                        gameTimer = setInterval(() => {
+                            timeLeft--;
+                            scoreDisplay.textContent = 'Score: ' + score + ' | Time: ' + timeLeft;
+                            if (gameInstance.winCondition(score) && !coinsAwarded) {
+                                whackGameMessage.textContent = `Mubarak ho! Aapne ${gameInstance.coinReward} coins jeete!`;
+                                whackGameMessage.classList.add('text-green-400');
+                                awardCoins(gameInstance.coinReward);
+                                coinsAwarded = true;
+                            }
+                            if (timeLeft <= 0) {
+                                endGame();
+                            }
+                        }, 1000);
+
+                        popUpMole(); // Start moles popping
+                    }
+
+                    function endGame() {
+                        gameRunning = false;
+                        clearInterval(gameTimer);
+                        scoreDisplay.textContent = 'Game Over! Final Score: ' + score;
+                        startButton.disabled = false;
+                        resetButton.disabled = false;
+                        moles.forEach(mole => { // Hide all moles
+                            mole.isUp = false;
+                            mole.hit = false;
+                        });
+                        drawGame();
+                    }
+
+                    function resetGame() {
+                        clearInterval(gameTimer);
+                        score = 0;
+                        timeLeft = gameDuration;
+                        gameRunning = false;
+                        scoreDisplay.textContent = 'Score: 0 | Time: ' + gameDuration;
+                        whackGameMessage.textContent = '';
+                        whackGameMessage.classList.remove('text-green-400');
+                        startButton.disabled = false;
+                        resetButton.disabled = true;
+                        createHoles();
+                        drawGame();
+                        coinsAwarded = false; // Reset coin award status
+                    }
+
+                    // Add start/reset buttons dynamically since they are not in HTML
+                    if (!document.getElementById('mazeStartButton')) {
+                        const controlsDiv = canvas.parentElement.querySelector('.canvas-game-controls');
+                        const startBtn = document.createElement('button');
+                        startBtn.id = 'mazeStartButton';
+                        startBtn.textContent = 'Start Game';
+                        startBtn.className = 'bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300';
+                        controlsDiv.appendChild(startBtn);
+
+                        const resetBtn = document.createElement('button');
+                        resetBtn.id = 'mazeResetButton';
+                        resetBtn.textContent = 'Reset Game';
+                        resetBtn.className = 'ml-4 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300';
+                        controlsDiv.appendChild(resetBtn);
+
+                        startBtn.addEventListener('click', startGame);
+                        resetBtn.addEventListener('click', resetGame);
+                    }
+
+                    resetGame(); // Initial draw
+                }
+            },
+            {
+                id: 'simple-maze',
+                name: 'Simple Maze Game',
+                imageUrl: 'https://placehold.co/400x250/4B0082/FFFFFF?text=Maze+Game',
+                description: 'Ball ko maze se bahar nikalo!',
+                type: 'internal',
+                category: ['Puzzle', 'Casual', 'New Games'],
+                coinReward: 20,
+                winCondition: (isSolved) => isSolved,
+                gameHtml: `
+                    <div class="game-canvas-container">
+                        <canvas id="mazeCanvas" width="300" height="300" class="border-4 border-gray-700"></canvas>
+                        <p id="mazeStatus" class="text-xl font-bold mt-2 mb-4 game-message-area">Maze solve karo!</p>
+                        <div class="canvas-game-controls">
+                            <button id="mazeStartButton">Start Game</button>
+                            <button id="mazeResetButton" class="ml-4">Reset Game</button>
+                        </div>
+                        <div class="game-instructions">
+                            <h4>Kaise Khelein:</h4>
+                            <p>Ball ko maze ke andar se navigate karein aur exit point (green square) tak pahunchayein. Deewaron se takrane se bachein. Maze solve karne par aapko ${20} coins milenge!</p>
+                            <h4>Controls:</h4>
+                            <ul>
+                                <li><strong>Arrow Keys (Up, Down, Left, Right):</strong> Ball ko move karne ke liye.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                gameScript: function() {
+                    const canvas = document.getElementById('mazeCanvas');
+                    const ctx = canvas.getContext('2d');
+                    const mazeStatus = document.getElementById('mazeStatus');
+                    const startButton = document.getElementById('mazeStartButton');
+                    const resetButton = document.getElementById('mazeResetButton');
+                    const gameInstance = games.find(g => g.id === 'simple-maze');
+
+                    const cellSize = 30;
+                    const mazeWidth = canvas.width / cellSize;
+                    const mazeHeight = canvas.height / cellSize;
+
+                    let maze = [
+                        [1,1,1,1,1,1,1,1,1,1],
+                        [1,0,0,0,1,0,0,0,0,1],
+                        [1,1,1,0,1,0,1,1,0,1],
+                        [1,0,0,0,0,0,1,0,0,1],
+                        [1,0,1,1,1,1,1,0,1,1],
+                        [1,0,0,0,1,0,0,0,0,1],
+                        [1,1,0,1,1,0,1,1,0,1],
+                        [1,0,0,0,0,0,1,0,0,1],
+                        [1,0,1,1,1,1,1,0,1,1],
+                        [1,0,0,0,0,0,0,0,0,2] // 2 is the exit
+                    ];
+
+                    let player = { x: 1, y: 1, radius: cellSize / 3, speed: 2 }; // Player starts at (1,1)
+                    let gameRunning = false;
+                    let gameLoopId;
+                    let keys = {};
+                    let coinsAwarded = false;
+
+                    document.addEventListener('keydown', (e) => { keys[e.key] = true; });
+                    document.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+                    function drawMaze() {
+                        for (let r = 0; r < mazeHeight; r++) {
+                            for (let c = 0; c < mazeWidth; c++) {
+                                if (maze[r][c] === 1) { // Wall
+                                    ctx.fillStyle = '#4a5568'; // Dark gray wall
+                                    ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+                                } else if (maze[r][c] === 2) { // Exit
+                                    ctx.fillStyle = '#27ae60'; // Green exit
+                                    ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+                                } else { // Path
+                                    ctx.fillStyle = '#1a202c'; // Background color
+                                    ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+                                }
+                            }
+                        }
+                    }
+
+                    function drawPlayer() {
+                        ctx.beginPath();
+                        ctx.arc(player.x * cellSize + cellSize / 2, player.y * cellSize + cellSize / 2, player.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = 'yellow';
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+
+                    function updateGame() {
+                        if (!gameRunning) return;
+
+                        let newPlayerX = player.x;
+                        let newPlayerY = player.y;
+
+                        if (keys['ArrowUp']) newPlayerY -= player.speed / cellSize;
+                        if (keys['ArrowDown']) newPlayerY += player.speed / cellSize;
+                        if (keys['ArrowLeft']) newPlayerX -= player.speed / cellSize;
+                        if (keys['ArrowRight']) newPlayerX += player.speed / cellSize;
+
+                        // Clamp player position to canvas bounds
+                        newPlayerX = Math.max(0, Math.min(mazeWidth - (player.radius * 2 / cellSize), newPlayerX));
+                        newPlayerY = Math.max(0, Math.min(mazeHeight - (player.radius * 2 / cellSize), newPlayerY));
+
+                        // Check for wall collisions
+                        // This collision detection is simplified and might allow slight overlap.
+                        // For pixel-perfect collision, more complex logic is needed.
+                        const playerLeft = newPlayerX;
+                        const playerRight = newPlayerX + (player.radius * 2 / cellSize);
+                        const playerTop = newPlayerY;
+                        const playerBottom = newPlayerY + (player.radius * 2 / cellSize);
+
+                        let collided = false;
+
+                        // Check corners of the player's bounding box against maze walls
+                        const checkCollisionAt = (x, y) => {
+                            const cellX = Math.floor(x);
+                            const cellY = Math.floor(y);
+                            return cellX >= 0 && cellX < mazeWidth && cellY >= 0 && cellY < mazeHeight && maze[cellY][cellX] === 1;
+                        };
+
+                        if (
+                            checkCollisionAt(playerLeft, playerTop) ||
+                            checkCollisionAt(playerRight, playerTop) ||
+                            checkCollisionAt(playerLeft, playerBottom) ||
+                            checkCollisionAt(playerRight, playerBottom)
+                        ) {
+                            collided = true;
+                        }
+
+
+                        if (!collided) {
+                            player.x = newPlayerX;
+                            player.y = newPlayerY;
+                        }
+
+                        // Check for exit
+                        const playerCenterCellX = Math.floor(player.x + player.radius / cellSize);
+                        const playerCenterCellY = Math.floor(player.y + player.radius / cellSize);
+
+                        if (maze[playerCenterCellY][playerCenterCellX] === 2) {
+                            mazeStatus.textContent = 'Mubarak ho! Aap maze se bahar nikal gaye! 🎉';
+                            mazeStatus.classList.add('text-green-400');
+                            if (gameInstance.winCondition(true) && !coinsAwarded) {
+                                awardCoins(gameInstance.coinReward);
+                                coinsAwarded = true;
+                            }
+                            endGame();
+                            return;
+                        }
+
+                        drawMaze();
+                        drawPlayer();
+                        gameLoopId = requestAnimationFrame(updateGame);
+                    }
+
+                    function startGame() {
+                        if (gameRunning) return;
+                        resetGame();
+                        gameRunning = true;
+                        startButton.disabled = true;
+                        resetButton.disabled = false;
+                        mazeStatus.textContent = 'Maze solve karo!';
+                        mazeStatus.classList.remove('text-green-400', 'text-red-400');
+                        gameLoopId = requestAnimationFrame(updateGame);
+                    }
+
+                    function endGame() {
+                        gameRunning = false;
+                        cancelAnimationFrame(gameLoopId);
+                        startButton.disabled = false;
+                        resetButton.disabled = false;
+                    }
+
+                    function resetGame() {
+                        cancelAnimationFrame(gameLoopId);
+                        player = { x: 1, y: 1, radius: cellSize / 3, speed: 2 };
+                        mazeStatus.textContent = 'Maze solve karo!';
+                        mazeStatus.classList.remove('text-green-400', 'text-red-400');
+                        startButton.disabled = false;
+                        resetButton.disabled = true;
+                        drawMaze();
+                        drawPlayer();
+                        gameRunning = false;
+                        coinsAwarded = false; // Reset coin award status
+                    }
+
+                    startButton.addEventListener('click', startGame);
+                    resetButton.addEventListener('click', resetGame);
+
+                    resetGame(); // Initial draw
+                }
+            }
+        ]
+
+
+        const gamesContainer = document.getElementById('gamesContainer');
+        const gameModalOverlay = document.getElementById('gameModalOverlay');
+        const closeModalButton = document.getElementById('closeModalButton');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+        const searchInput = document.getElementById('searchInput');
+        const sidebarIcons = document.querySelectorAll('.sidebar-icon');
+        const mainContentTitle = document.getElementById('mainContentTitle');
+        const featuredGamesContainer = document.getElementById('featuredGamesContainer');
+        const shopIcon = document.getElementById('shopIcon');
+        const shopModalOverlay = document.getElementById('shopModalOverlay');
+        const closeShopModalButton = document.getElementById('closeShopModalButton');
+
+        let currentCategory = 'All Games'; // Track active category
+
+        /**
+         * Renders game cards dynamically into the game grid based on current filters.
+         * @param {Array} gamesToFilter - The array of games to filter from (defaults to all games).
+         */
+        function renderGameCards(gamesToFilter = games) {
+            gamesContainer.innerHTML = ''; // Clear existing cards
+
+            // Filter by current category first
+            let gamesToRender = gamesToFilter;
+            if (currentCategory !== 'All Games') {
+                gamesToRender = gamesToRender.filter(game => game.category.includes(currentCategory));
+            }
+
+            // Then filter by search input
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            if (searchTerm) {
+                gamesToRender = gamesToRender.filter(game =>
+                    game.name.toLowerCase().includes(searchTerm) ||
+                    game.description.toLowerCase().includes(searchTerm) ||
+                    game.category.some(cat => cat.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            if (gamesToRender.length === 0) {
+                gamesContainer.innerHTML = '<p class="text-center text-gray-400 col-span-full">Koi game nahi mila is category ya search mein.</p>';
+                return;
+            }
+
+            gamesToRender.forEach(game => {
+                const gameCard = document.createElement('div');
+                gameCard.className = 'bg-gray-800 rounded-lg shadow-xl overflow-hidden transform transition duration-300 hover:scale-105 relative';
+                gameCard.innerHTML = `
+                    <img src="${game.imageUrl}" alt="${game.name}" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-xl font-semibold text-gray-100 mb-2">${game.name}</h3>
+                        <p class="text-gray-400 text-sm mb-4">${game.description}</p>
+                        <button data-game-id="${game.id}" class="play-button w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-colors duration-200">
+                            Play Now
+                        </button>
+                    </div>
+                `;
+                gamesContainer.appendChild(gameCard);
+            });
+
+            // Add event listeners to play buttons after they are rendered
+            document.querySelectorAll('.play-button').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const gameId = event.target.dataset.gameId;
+                    openGameModal(gameId);
+                });
+            });
+        }
+
+        /**
+         * Renders featured games.
+         */
+        function renderFeaturedGames() {
+            featuredGamesContainer.innerHTML = '';
+            // Select a few games to feature (e.g., first 2 or 3, or specific ones)
+            const featuredGameIds = ['flappy-bird', 'simple-racing', 'whack-a-mole']; // Example featured games
+            const featuredGames = games.filter(game => featuredGameIds.includes(game.id));
+
+            featuredGames.forEach(game => {
+                const featuredCard = document.createElement('div');
+                featuredCard.className = 'bg-gray-700 rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row items-center featured-game-card';
+                featuredCard.innerHTML = `
+                    <img src="${game.imageUrl}" alt="${game.name}" class="w-full md:w-1/2 h-48 md:h-auto object-cover">
+                    <div class="p-4 flex-grow text-left">
+                        <h3 class="text-2xl font-bold text-gray-100 mb-2">${game.name}</h3>
+                        <p class="text-gray-300 mb-4">${game.description}</p>
+                        <button data-game-id="${game.id}" class="play-button bg-purple-600 text-white font-bold py-2 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition-colors duration-200">
+                            Play Now
+                        </button>
+                    </div>
+                `;
+                featuredGamesContainer.appendChild(featuredCard);
+            });
+        }
+
+
+        /**
+         * Opens the game modal and loads the selected game or info.
+         * @param {string} id - The ID of the game or action to open.
+         * @param {string} type - 'game' or 'info'
+         */
+        function openGameModal(id, type = 'game') {
+            if (type === 'game') {
+                const game = games.find(g => g.id === id);
+                if (game) {
+                    modalTitle.textContent = game.name;
+                    modalContent.innerHTML = game.gameHtml; // Load game HTML into modal content
+
+                    // Execute the game's script after its HTML is loaded
+                    if (game.gameScript && typeof game.gameScript === 'function') {
+                        // Use a small delay to ensure DOM elements are fully rendered
+                        // This is crucial for game scripts to find their elements
+                        setTimeout(game.gameScript, 100);
+                    }
+                } else {
+                    console.error('Game not found:', id);
+                    modalTitle.textContent = 'Error';
+                    modalContent.innerHTML = '<p class="text-red-400">Game load nahi ho paya.</p>';
+                }
+            } else if (type === 'info') {
+                modalTitle.textContent = "Information";
+                modalContent.innerHTML = '<p class="text-gray-400">This feature is not available in this version.</p>';
+            }
+            gameModalOverlay.classList.add('show'); // Show the modal
+        }
+
+        /**
+         * Closes the game modal and clears its content.
+         */
+        function closeModal() {
+            gameModalOverlay.classList.remove('show'); // Hide the modal
+            modalTitle.textContent = ''; // Clear title
+            modalContent.innerHTML = ''; // Clear game content
+        }
+
+        // Event listener for closing the game modal
+        closeModalButton.addEventListener('click', closeModal);
+
+        // Close game modal if user clicks outside of the content (optional)
+        gameModalOverlay.addEventListener('click', (event) => {
+            if (event.target === gameModalOverlay) {
+                closeModal();
+            }
+        });
+
+        // --- Shop Modal Functions ---
+        function openShopModal() {
+            shopModalOverlay.classList.add('show');
+            renderShop(); // Render shop items when modal opens
+        }
+
+        function closeShopModal() {
+            shopModalOverlay.classList.remove('show');
+        }
+
+        // Event listener for opening the shop modal
+        shopIcon.addEventListener('click', openShopModal);
+        // Event listener for closing the shop modal
+        closeShopModalButton.addEventListener('click', closeShopModal);
+        shopModalOverlay.addEventListener('click', (event) => {
+            if (event.target === shopModalOverlay) {
+                closeShopModal();
+            }
+        });
+
+
+        // --- Sidebar Category Filtering ---
+        sidebarIcons.forEach(icon => {
+            icon.addEventListener('click', () => {
+                // Remove 'active' class from all sidebar icons
+                sidebarIcons.forEach(i => i.classList.remove('active'));
+                // Add 'active' class to the clicked icon
+                icon.classList.add('active');
+
+                currentCategory = icon.dataset.category;
+                mainContentTitle.textContent = currentCategory; // Update main title
+                renderGameCards(); // Re-render games based on new category
+            });
+        });
+
+        // --- Search Functionality ---
+        searchInput.addEventListener('input', () => {
+            renderGameCards(); // Re-render games based on search input
+        });
+
+        // Initial state on load
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeFirebase(); // Initialize Firebase on load
+            renderFeaturedGames(); // Render featured games initially
+            renderGameCards(); // Render all games initially
+        });
+
+    </script>
+</body>
+</html>
