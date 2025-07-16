@@ -21,6 +21,13 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            /* Default overflow for body */
+            overflow-y: auto;
+        }
+
+        /* Class to prevent body scrolling when modal is open */
+        body.modal-open {
+            overflow: hidden;
         }
 
         /* Custom scrollbar for better aesthetics */
@@ -362,6 +369,15 @@
             box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
             display: block; /* Remove extra space below canvas */
             margin-bottom: 1rem;
+            width: 100%; /* Make canvas responsive */
+            height: auto; /* Maintain aspect ratio */
+        }
+        .canvas-game-controls {
+            display: flex;
+            flex-wrap: wrap; /* Allow controls to wrap on smaller screens */
+            justify-content: center;
+            gap: 0.75rem; /* Space between buttons */
+            margin-top: 1rem;
         }
         .canvas-game-controls button {
             background-color: #4c51bf;
@@ -370,10 +386,47 @@
             border-radius: 0.5rem;
             font-weight: 600;
             transition: background-color 0.2s ease;
+            flex-shrink: 0; /* Prevent buttons from shrinking */
         }
         .canvas-game-controls button:hover {
             background-color: #5a62e0;
         }
+        /* D-pad specific styling */
+        .d-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 5px;
+            width: 150px; /* Fixed width for D-pad */
+            height: 150px; /* Fixed height for D-pad */
+            margin: 0.5rem auto;
+        }
+        .d-pad .d-button {
+            background-color: #6366f1; /* Indigo-500 */
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .d-pad .d-button:hover {
+            background-color: #4f46e5; /* Darker indigo */
+        }
+        .d-pad .d-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+        .d-pad .d-button.empty {
+            background-color: transparent;
+            cursor: default;
+            box-shadow: none;
+        }
+
 
         /* Featured Games Section */
         .featured-games-section {
@@ -523,11 +576,12 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
             </div>
-            <!-- Coin Display and Shop Icon -->
+            <!-- Coin Display, Profile Icon and Shop Icon -->
             <div class="header-user-actions">
                 <span class="text-xl font-bold text-yellow-400 mr-4">
                     <i class="fas fa-coins mr-1"></i> <span id="coinCount">0</span>
                 </span>
+                <i class="fas fa-user-circle header-user-icon mr-2" id="profileIcon" title="Profile"></i>
                 <i class="fas fa-store header-user-icon" id="shopIcon" title="Shop"></i>
             </div>
         </div>
@@ -551,6 +605,7 @@
             <div class="sidebar-icon" data-category="Board" title="Board Games"><i class="fas fa-chess-board"></i></div>
             <div class="sidebar-icon" data-category="Casual" title="Casual Games"><i class="fas fa-dice"></i></div>
             <div class="sidebar-icon" data-category="Arcade" title="Arcade Games"><i class="fas fa-gamepad"></i></div>
+            <div class="sidebar-icon" data-category="Leaderboard" title="Leaderboard"><i class="fas fa-trophy"></i></div>
         </aside>
 
         <!-- Main Content Area - Game Cards -->
@@ -562,12 +617,13 @@
                     <!-- Featured game cards will be dynamically inserted here -->
                 </div>
             </section>
-            <section>
+             <section>
    
   <script async="async" data-cfasync="false" src="//pl26912395.profitableratecpm.com/6e43b33942e8db637fe0e52324f94bb2/invoke.js"></script>
 <div id="container-6e43b33942e8db637fe0e52324f94bb2"></div>
 
             </section>
+
 
             <h2 id="mainContentTitle" class="text-3xl font-bold text-gray-200 mb-6 text-center md:text-left">All Games</h2>
             <!-- Category/Filter Dropdown (Mock - now just for display) -->
@@ -583,7 +639,6 @@
             <div id="gamesContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 <!-- Game cards will be dynamically inserted here by JavaScript -->
             </div>
-            
         </main>
     </div>
 
@@ -592,7 +647,7 @@
         <div class="container mx-auto text-center text-gray-400">
             &copy; 2025 Free Games Hub. Sabhi Rights Reserved.
         </div>
-                      <script type="text/javascript">
+         <script type="text/javascript">
 	atOptions = {
 		'key' : 'e35e859d306243c3bdd3a91697d58adc',
 		'format' : 'iframe',
@@ -627,6 +682,68 @@
         </div>
     </div>
 
+    <!-- Profile Modal -->
+    <div id="profileModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <button id="closeProfileModalButton" class="close-button">&times;</button>
+            <h3 class="text-3xl font-bold text-indigo-400 mb-6 text-center">👤 Aapki Profile</h3>
+            <div class="text-center">
+                <p class="text-xl mb-4">User ID: <span id="profileUserId" class="font-bold text-gray-200 text-lg break-all"></span></p>
+                <p class="text-xl mb-6">Coins: <span id="profileCoinCount" class="font-bold text-yellow-400 text-3xl">0</span></p>
+
+                <div class="bg-gray-700 rounded-lg p-4 mb-4">
+                    <h4 class="text-xl font-semibold text-gray-200 mb-3">🏆 Achievements</h4>
+                    <p class="text-gray-400">Achievements abhi aane wale hain!</p>
+                </div>
+
+                <div class="bg-gray-700 rounded-lg p-4">
+                    <h4 class="text-xl font-semibold text-gray-200 mb-3">🗓️ Daily Quests</h4>
+                    <p class="text-gray-400">Aaj ka quest: Koi bhi game 3 baar khelein. Reward: 20 Coins!</p>
+                    <p class="text-gray-400 mt-2">More quests coming soon!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboardModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <button id="closeLeaderboardModalButton" class="close-button">&times;</button>
+            <h3 class="text-3xl font-bold text-indigo-400 mb-6 text-center">📊 Leaderboards</h3>
+            <div class="text-center">
+                <p class="text-lg text-gray-300 mb-4">Top Players!</p>
+                <ul id="leaderboardList" class="list-none p-0 mx-auto max-w-md">
+                    <li class="flex justify-between items-center bg-gray-700 p-3 rounded-md mb-2">
+                        <span class="font-semibold text-gray-200">Player123</span>
+                        <span class="text-yellow-400"><i class="fas fa-coins mr-1"></i> 1500</span>
+                    </li>
+                    <li class="flex justify-between items-center bg-gray-700 p-3 rounded-md mb-2">
+                        <span class="font-semibold text-gray-200">GameMaster</span>
+                        <span class="text-yellow-400"><i class="fas fa-coins mr-1"></i> 1200</span>
+                    </li>
+                    <li class="flex justify-between items-center bg-gray-700 p-3 rounded-md mb-2">
+                        <span class="font-semibold text-gray-200">ProGamer789</span>
+                        <span class="text-yellow-400"><i class="fas fa-coins mr-1"></i> 950</span>
+                    </li>
+                    <li class="flex justify-between items-center bg-gray-700 p-3 rounded-md mb-2">
+                        <span class="font-semibold text-gray-200">NoobSlayer</span>
+                        <span class="text-yellow-400"><i class="fas fa-coins mr-1"></i> 700</span>
+                    </li>
+                    <li class="flex justify-between items-center bg-gray-700 p-3 rounded-md mb-2">
+                        <span class="font-semibold text-gray-200">PixelHero</span>
+                        <span class="text-yellow-400"><i class="fas fa-coins mr-1"></i> 500</span>
+                    </li>
+                    <li class="flex justify-between items-center bg-gray-700 p-3 rounded-md mb-2">
+                        <span class="font-semibold text-gray-200">Aap</span>
+                        <span class="text-yellow-400"><i class="fas fa-coins mr-1"></i> <span id="yourLeaderboardCoins">0</span></span>
+                    </li>
+                </ul>
+                <p class="text-sm text-gray-400 mt-4">Real-time leaderboards aur zyada games ke liye support jald hi aayega!</p>
+            </div>
+        </div>
+    </div>
+
+
     <script type="module">
         // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -645,6 +762,10 @@
         let userInventory = []; // Stores IDs of purchased items
 
         const coinCountElement = document.getElementById('coinCount');
+        const profileUserIdElement = document.getElementById('profileUserId');
+        const profileCoinCountElement = document.getElementById('profileCoinCount');
+        const yourLeaderboardCoinsElement = document.getElementById('yourLeaderboardCoins');
+
 
         // Initialize Firebase and authenticate user
         async function initializeFirebase() {
@@ -701,6 +822,8 @@
                 }
                 updateCoinDisplay();
                 renderShop(); // Re-render shop to update item statuses (e.g., "Owned")
+                updateProfileDisplay(); // Update profile modal content
+                updateLeaderboardDisplay(); // Update leaderboard display
             }, (error) => {
                 console.error("Error listening to user data:", error);
             });
@@ -710,6 +833,23 @@
         function updateCoinDisplay() {
             if (coinCountElement) {
                 coinCountElement.textContent = userCoins;
+            }
+        }
+
+        // Update profile modal display
+        function updateProfileDisplay() {
+            if (profileUserIdElement) {
+                profileUserIdElement.textContent = userId;
+            }
+            if (profileCoinCountElement) {
+                profileCoinCountElement.textContent = userCoins;
+            }
+        }
+
+        // Update leaderboard display (for mock data, just update user's score)
+        function updateLeaderboardDisplay() {
+            if (yourLeaderboardCoinsElement) {
+                yourLeaderboardCoinsElement.textContent = userCoins;
             }
         }
 
@@ -913,7 +1053,7 @@
                             <p>Jitni jaldi ho sake button par click karein aur apna score badhayein. 50 clicks par aapko ${10} coins milenge!</p>
                             <h4>Controls:</h4>
                             <ul>
-                                <li><strong>Mouse Click:</strong> Button par click karne ke liye.</li>
+                                <li><strong>Mouse Click / Tap:</strong> Button par click karne ke liye.</li>
                             </ul>
                         </div>
                     </div>
@@ -1023,7 +1163,7 @@
                             <p>Aap X hain aur Computer O hai. Apni baari mein board par ek khaali square par click karein. Pehla player jo apne teen nishanon ko horizontal, vertical, ya diagonal line mein laga dega, woh jeet jayega. Computer ko harane par aapko ${15} coins milenge!</p>
                             <h4>Controls:</h4>
                             <ul>
-                                <li><strong>Mouse Click:</strong> Board par square choose karne ke liye.</li>
+                                <li><strong>Mouse Click / Tap:</strong> Board par square choose karne ke liye.</li>
                             </ul>
                         </div>
                     </div>
@@ -1173,7 +1313,7 @@
                             <p>Cards ko palat kar unke matching pairs dhoondhein. Ek baar mein do cards palat sakte hain. Agar cards match karte hain, toh woh khule rehte hain, warna woh wapas palat jaate hain. Saare pairs dhoondhne par aap jeet jaayenge aur ${25} coins milenge!</p>
                             <h4>Controls:</h4>
                             <ul>
-                                <li><strong>Mouse Click:</strong> Cards ko palatne ke liye.</li>
+                                <li><strong>Mouse Click / Tap:</strong> Cards ko palatne ke liye.</li>
                             </ul>
                         </div>
                     </div>
@@ -1314,7 +1454,7 @@
                             <p>Screen par dikhne wale target ko click karein. Har sahi click par aapko points milenge. Target alag-alag jagahon par dikhega. 50 score banane par aapko ${15} coins milenge!</p>
                             <h4>Controls:</h4>
                             <ul>
-                                <li><strong>Mouse Click:</strong> Target par click karne ke liye.</li>
+                                <li><strong>Mouse Click / Tap:</strong> Target par click karne ke liye.</li>
                             </ul>
                         </div>
                     </div>
@@ -1482,7 +1622,7 @@
                             <p>Bird ko pipes ke beech se nikaal kar score banayein. Pipes ko touch karne ya zameen par girne se game over ho jayega. 10 score banane par aapko ${20} coins milenge!</p>
                             <h4>Controls:</h4>
                             <ul>
-                                <li><strong>Mouse Click / Tap:</strong> Bird ko upar udaane ke liye.</li>
+                                <li><strong>Mouse Click / Tap:</strong> Canvas par click/tap karein bird ko upar udaane ke liye.</li>
                             </ul>
                         </div>
                     </div>
@@ -1506,16 +1646,46 @@
                     let gameLoopId;
                     let coinsAwarded = false;
 
+                    // Original canvas dimensions for scaling reference
+                    const originalCanvasWidth = 320;
+                    const originalCanvasHeight = 480;
+
+                    // Adjust canvas size for responsiveness
+                    const resizeCanvas = () => {
+                        const container = canvas.parentElement;
+                        const maxWidth = container.clientWidth;
+                        const aspectRatio = originalCanvasWidth / originalCanvasHeight;
+
+                        let newWidth = maxWidth;
+                        let newHeight = newWidth / aspectRatio;
+
+                        // Limit max width to original canvas width if on larger screens
+                        if (newWidth > originalCanvasWidth) {
+                            newWidth = originalCanvasWidth;
+                            newHeight = originalCanvasHeight;
+                        }
+
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+                        // Redraw game elements after resize if necessary (for Flappy Bird, it's simpler as it redraws constantly)
+                    };
+
+
                     function drawBird() {
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
                         ctx.fillStyle = 'yellow';
-                        ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+                        ctx.fillRect(bird.x * scaleX, bird.y * scaleY, bird.width * scaleX, bird.height * scaleY);
                     }
 
                     function drawPipes() {
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
                         ctx.fillStyle = 'green';
                         for (let i = 0; i < pipes.length; i++) {
-                            ctx.fillRect(pipes[i].x, 0, pipeWidth, pipes[i].top);
-                            ctx.fillRect(pipes[i].x, pipes[i].bottom, pipeWidth, canvas.height - pipes[i].bottom);
+                            // Scale pipe positions and dimensions
+                            ctx.fillRect(pipes[i].x * scaleX, 0, pipeWidth * scaleX, pipes[i].top * scaleY);
+                            ctx.fillRect(pipes[i].x * scaleX, pipes[i].bottom * scaleY, pipeWidth * scaleX, (originalCanvasHeight - pipes[i].bottom) * scaleY);
                         }
                     }
 
@@ -1527,19 +1697,19 @@
                         bird.velocity += bird.gravity;
                         bird.y += bird.velocity;
 
-                        // Bird collision with ground or ceiling
-                        if (bird.y + bird.height > canvas.height || bird.y < 0) {
+                        // Bird collision with ground or ceiling (using original coordinates for logic)
+                        if (bird.y + bird.height > originalCanvasHeight || bird.y < 0) {
                             endGame();
                             return;
                         }
 
-                        // Add new pipes
+                        // Add new pipes (using original coordinates for logic)
                         if (frame % 90 === 0) { // Every 90 frames
-                            let pipeHeight = Math.floor(Math.random() * (canvas.height - pipeGap - 50)) + 20; // Random height for top pipe
-                            pipes.push({ x: canvas.width, top: pipeHeight, bottom: pipeHeight + pipeGap });
+                            let pipeHeight = Math.floor(Math.random() * (originalCanvasHeight - pipeGap - 50)) + 20; // Random height for top pipe
+                            pipes.push({ x: originalCanvasWidth, top: pipeHeight, bottom: pipeHeight + pipeGap, passed: false });
                         }
 
-                        // Move pipes and check for collision
+                        // Move pipes and check for collision (using original coordinates for logic)
                         for (let i = 0; i < pipes.length; i++) {
                             // Check for scoring first, as it depends on current pipe
                             if (pipes[i].x + pipeWidth < bird.x && !pipes[i].passed) {
@@ -1554,9 +1724,9 @@
                                 }
                             }
 
-                            pipes[i].x -= 2; // Move pipe
+                            pipes[i].x -= 2; // Move pipe (original speed)
 
-                            // Collision detection
+                            // Collision detection (using original coordinates)
                             if (
                                 pipes[i] && // Ensure pipe still exists after potential scoring logic
                                 bird.x < pipes[i].x + pipeWidth &&
@@ -1625,9 +1795,11 @@
                     canvas.addEventListener('click', flap);
                     startButton.addEventListener('click', startGame);
                     resetButton.addEventListener('click', resetGame);
+                    window.addEventListener('resize', resizeCanvas); // Add resize listener
 
                     // Initial setup
                     resetGame();
+                    resizeCanvas(); // Set initial canvas size
                 }
             },
             {
@@ -1647,6 +1819,18 @@
                             <button id="snakeStartButton">Start Game</button>
                             <button id="snakeResetButton" class="ml-4">Reset Game</button>
                         </div>
+                        <!-- Mobile Controls -->
+                        <div class="d-pad">
+                            <div class="d-button empty"></div>
+                            <div class="d-button" id="snakeUp">⬆️</div>
+                            <div class="d-button empty"></div>
+                            <div class="d-button" id="snakeLeft">⬅️</div>
+                            <div class="d-button empty"></div>
+                            <div class="d-button" id="snakeRight">➡️</div>
+                            <div class="d-button empty"></div>
+                            <div class="d-button" id="snakeDown">⬇️</div>
+                            <div class="d-button empty"></div>
+                        </div>
                         <p id="snakeGameMessage" class="text-lg mt-4 font-semibold text-gray-300 game-message-area"></p>
                         <div class="game-instructions">
                             <h4>Kaise Khelein:</h4>
@@ -1654,6 +1838,7 @@
                             <h4>Controls:</h4>
                             <ul>
                                 <li><strong>Arrow Keys (Up, Down, Left, Right):</strong> Snake ki disha badalne ke liye.</li>
+                                <li><strong>Touch D-Pad:</strong> Mobile par disha badalne ke liye.</li>
                             </ul>
                         </div>
                     </div>
@@ -1667,6 +1852,12 @@
                     const snakeGameMessage = document.getElementById('snakeGameMessage');
                     const gameInstance = games.find(g => g.id === 'snake-game');
 
+                    // Mobile control buttons
+                    const snakeUp = document.getElementById('snakeUp');
+                    const snakeDown = document.getElementById('snakeDown');
+                    const snakeLeft = document.getElementById('snakeLeft');
+                    const snakeRight = document.getElementById('snakeRight');
+
                     const gridSize = 20; // Size of each snake segment and food
                     let snake = [{ x: 10, y: 10 }]; // Initial snake position
                     let food = {};
@@ -1678,10 +1869,34 @@
                     let changingDirection = false;
                     let coinsAwarded = false;
 
+                    // Original canvas dimensions for scaling reference
+                    const originalCanvasWidth = 400;
+                    const originalCanvasHeight = 400;
+
+                    // Adjust canvas size for responsiveness
+                    const resizeCanvas = () => {
+                        const container = canvas.parentElement;
+                        const maxWidth = container.clientWidth;
+                        const aspectRatio = originalCanvasWidth / originalCanvasHeight;
+
+                        let newWidth = maxWidth;
+                        let newHeight = newWidth / aspectRatio;
+
+                        // Limit max width to original canvas width if on larger screens
+                        if (newWidth > originalCanvasWidth) {
+                            newWidth = originalCanvasWidth;
+                            newHeight = originalCanvasHeight;
+                        }
+
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+                        draw(); // Redraw game elements after resize
+                    };
+
                     function generateFood() {
                         food = {
-                            x: Math.floor(Math.random() * (canvas.width / gridSize)),
-                            y: Math.floor(Math.random() * (canvas.height / gridSize))
+                            x: Math.floor(Math.random() * (originalCanvasWidth / gridSize)),
+                            y: Math.floor(Math.random() * (originalCanvasHeight / gridSize))
                         };
                         // Ensure food doesn't spawn on the snake
                         for (let i = 0; i < snake.length; i++) {
@@ -1694,18 +1909,21 @@
                     function draw() {
                         ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
 
-                        // Draw food
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
+
+                        // Draw food (scaled)
                         ctx.fillStyle = 'red';
                         ctx.strokeStyle = 'darkred';
-                        ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
-                        ctx.strokeRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+                        ctx.fillRect(food.x * gridSize * scaleX, food.y * gridSize * scaleY, gridSize * scaleX, gridSize * scaleY);
+                        ctx.strokeRect(food.x * gridSize * scaleX, food.y * gridSize * scaleY, gridSize * scaleX, gridSize * scaleY);
 
-                        // Draw snake
+                        // Draw snake (scaled)
                         ctx.fillStyle = 'lime';
                         ctx.strokeStyle = 'darkgreen';
                         for (let i = 0; i < snake.length; i++) {
-                            ctx.fillRect(snake[i].x * gridSize, snake[i].y * gridSize, gridSize, gridSize);
-                            ctx.strokeRect(snake[i].x * gridSize, snake[i].y * gridSize, gridSize, gridSize);
+                            ctx.fillRect(snake[i].x * gridSize * scaleX, snake[i].y * gridSize * scaleY, gridSize * scaleX, gridSize * scaleY);
+                            ctx.strokeRect(snake[i].x * gridSize * scaleX, snake[i].y * gridSize * scaleY, gridSize * scaleX, gridSize * scaleY);
                         }
                     }
 
@@ -1714,11 +1932,11 @@
 
                         const head = { x: snake[0].x + dx, y: snake[0].y + dy };
 
-                        // Check for collision with walls
+                        // Check for collision with walls (using original grid coordinates)
                         const hitLeftWall = head.x < 0;
-                        const hitRightWall = head.x * gridSize >= canvas.width;
+                        const hitRightWall = head.x * gridSize >= originalCanvasWidth;
                         const hitTopWall = head.y < 0;
-                        const hitBottomWall = head.y * gridSize >= canvas.height;
+                        const hitBottomWall = head.y * gridSize >= originalCanvasHeight;
 
                         // Check for collision with self
                         const hitSelf = snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y);
@@ -1782,6 +2000,32 @@
                         }
                     }
 
+                    // Touch control handler
+                    function handleTouchDirection(direction) {
+                        if (changingDirection || !gameRunning) return;
+                        changingDirection = true;
+
+                        const goingUp = dy === -1;
+                        const goingDown = dy === 1;
+                        const goingLeft = dx === -1;
+                        const goingRight = dx === 1;
+
+                        switch (direction) {
+                            case 'up':
+                                if (!goingDown) { dx = 0; dy = -1; }
+                                break;
+                            case 'down':
+                                if (!goingUp) { dx = 0; dy = 1; }
+                                break;
+                            case 'left':
+                                if (!goingRight) { dx = -1; dy = 0; }
+                                break;
+                            case 'right':
+                                if (!goingLeft) { dx = 1; dy = 0; }
+                                break;
+                        }
+                    }
+
                     function startGame() {
                         if (gameRunning) return;
                         resetGame(); // Ensure clean state
@@ -1826,8 +2070,21 @@
                     startButton.addEventListener('click', startGame);
                     resetButton.addEventListener('click', resetGame);
 
+                    // Touch control event listeners
+                    snakeUp.addEventListener('touchstart', () => handleTouchDirection('up'));
+                    snakeUp.addEventListener('touchend', () => changingDirection = false); // Reset changingDirection on touchend
+                    snakeDown.addEventListener('touchstart', () => handleTouchDirection('down'));
+                    snakeDown.addEventListener('touchend', () => changingDirection = false);
+                    snakeLeft.addEventListener('touchstart', () => handleTouchDirection('left'));
+                    snakeLeft.addEventListener('touchend', () => changingDirection = false);
+                    snakeRight.addEventListener('touchstart', () => handleTouchDirection('right'));
+                    snakeRight.addEventListener('touchend', () => changingDirection = false);
+
+                    window.addEventListener('resize', resizeCanvas); // Add resize listener
+
                     // Initial setup
                     resetGame();
+                    resizeCanvas(); // Set initial canvas size
                 }
             },
             {
@@ -1847,15 +2104,21 @@
                             <button id="shooterGameStartButton">Start Game</button>
                             <button id="shooterGameResetButton" class="ml-4">Reset Game</button>
                         </div>
+                        <!-- Mobile Controls -->
+                        <div class="flex justify-center gap-4 mt-4">
+                            <button id="shooterLeft" class="d-button">⬅️</button>
+                            <button id="shooterShoot" class="d-button px-6">Shoot</button>
+                            <button id="shooterRight" class="d-button">➡️</button>
+                        </div>
                         <p id="spaceShooterGameMessage" class="text-lg mt-4 font-semibold text-gray-300 game-message-area"></p>
                         <div class="game-instructions">
                             <h4>Kaise Khelein:</h4>
                             <p>Apne spaceship ko control karein aur upar se girte hue asteroids ko shoot karke tod dein. Asteroids se takrane par game over ho jayega. Jitne zyada asteroids todoge, utna zyada score banega. 100 score banane par aapko ${35} coins milenge!</p>
                             <h4>Controls:</h4>
                             <ul>
-                                <li><strong>Left Arrow:</strong> Spaceship ko left move karne ke liye.</li>
-                                <li><strong>Right Arrow:</strong> Spaceship ko right move karne ke liye.</li>
-                                <li><strong>Spacebar:</strong> Shoot karne ke liye.</li>
+                                <li><strong>Left Arrow / Touch Left Button:</strong> Spaceship ko left move karne ke liye.</li>
+                                <li><strong>Right Arrow / Touch Right Button:</strong> Spaceship ko right move karne ke liye.</li>
+                                <li><strong>Spacebar / Touch Shoot Button:</strong> Shoot karne ke liye.</li>
                             </ul>
                         </div>
                     </div>
@@ -1869,6 +2132,11 @@
                     const spaceShooterGameMessage = document.getElementById('spaceShooterGameMessage');
                     const gameInstance = games.find(g => g.id === 'space-shooter');
 
+                    // Mobile control buttons
+                    const shooterLeft = document.getElementById('shooterLeft');
+                    const shooterRight = document.getElementById('shooterRight');
+                    const shooterShoot = document.getElementById('shooterShoot');
+
                     let player = { x: canvas.width / 2 - 15, y: canvas.height - 40, width: 30, height: 30, speed: 5 };
                     let bullets = [];
                     let asteroids = [];
@@ -1878,27 +2146,69 @@
                     let keys = {}; // To track pressed keys
                     let coinsAwarded = false;
 
+                    // Original canvas dimensions for scaling reference
+                    const originalCanvasWidth = 400;
+                    const originalCanvasHeight = 500;
+
+                    // Adjust canvas size for responsiveness
+                    const resizeCanvas = () => {
+                        const container = canvas.parentElement;
+                        const maxWidth = container.clientWidth;
+                        const aspectRatio = originalCanvasWidth / originalCanvasHeight;
+
+                        let newWidth = maxWidth;
+                        let newHeight = newWidth / aspectRatio;
+
+                        // Limit max width to original canvas width if on larger screens
+                        if (newWidth > originalCanvasWidth) {
+                            newWidth = originalCanvasWidth;
+                            newHeight = originalCanvasHeight;
+                        }
+
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+                        // Redraw game elements after resize if necessary
+                        drawPlayer();
+                        drawBullets();
+                        drawAsteroids();
+                    };
+
                     // Event listeners for player movement and shooting
                     document.addEventListener('keydown', (e) => { keys[e.key] = true; });
                     document.addEventListener('keyup', (e) => { keys[e.key] = false; });
 
+                    // Touch control handlers
+                    shooterLeft.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowLeft'] = true; });
+                    shooterLeft.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowLeft'] = false; });
+                    shooterRight.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowRight'] = true; });
+                    shooterRight.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowRight'] = false; });
+                    shooterShoot.addEventListener('touchstart', (e) => { e.preventDefault(); keys[' '] = true; });
+                    shooterShoot.addEventListener('touchend', (e) => { e.preventDefault(); keys[' '] = false; });
+
+
                     function drawPlayer() {
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
                         ctx.fillStyle = 'blue';
-                        ctx.fillRect(player.x, player.y, player.width, player.height);
+                        ctx.fillRect(player.x * scaleX, player.y * scaleY, player.width * scaleX, player.height * scaleY);
                     }
 
                     function drawBullets() {
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
                         ctx.fillStyle = 'yellow';
                         for (let i = 0; i < bullets.length; i++) {
-                            ctx.fillRect(bullets[i].x, bullets[i].y, bullets[i].width, bullets[i].height);
+                            ctx.fillRect(bullets[i].x * scaleX, bullets[i].y * scaleY, bullets[i].width * scaleX, bullets[i].height * scaleY);
                         }
                     }
 
                     function drawAsteroids() {
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
                         ctx.fillStyle = 'gray';
                         for (let i = 0; i < asteroids.length; i++) {
                             ctx.beginPath();
-                            ctx.arc(asteroids[i].x, asteroids[i].y, asteroids[i].radius, 0, Math.PI * 2);
+                            ctx.arc(asteroids[i].x * scaleX, asteroids[i].y * scaleY, asteroids[i].radius * scaleX, 0, Math.PI * 2);
                             ctx.fill();
                         }
                     }
@@ -1908,11 +2218,11 @@
 
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                        // Player movement
+                        // Player movement (using original coordinates for logic, scaling for drawing)
                         if (keys['ArrowLeft'] && player.x > 0) {
                             player.x -= player.speed;
                         }
-                        if (keys['ArrowRight'] && player.x + player.width < canvas.width) {
+                        if (keys['ArrowRight'] && player.x + player.width < originalCanvasWidth) {
                             player.x += player.speed;
                         }
                         // Shooting
@@ -1934,7 +2244,7 @@
                         // Generate asteroids
                         if (Math.random() < 0.02) { // Chance to spawn asteroid
                             asteroids.push({
-                                x: Math.random() * canvas.width,
+                                x: Math.random() * originalCanvasWidth,
                                 y: 0,
                                 radius: Math.random() * 15 + 10, // Random size
                                 speed: Math.random() * 2 + 1
@@ -1950,7 +2260,7 @@
 
                             asteroids[i].y += asteroids[i].speed;
 
-                            // Collision with player
+                            // Collision with player (using original coordinates)
                             if (player.x < asteroids[i].x + asteroids[i].radius &&
                                 player.x + player.width > asteroids[i].x - asteroids[i].radius &&
                                 player.y < asteroids[i].y + asteroids[i].radius &&
@@ -1959,7 +2269,7 @@
                                 return;
                             }
 
-                            // Collision with bullets
+                            // Collision with bullets (using original coordinates)
                             for (let j = 0; j < bullets.length; j++) {
                                 // Ensure bullet and asteroid exist before checking collision
                                 if (!bullets[j] || !asteroids[i]) continue;
@@ -1987,7 +2297,7 @@
                             }
 
                             // After potential splice, check if asteroid still exists before checking if it's off-screen
-                            if (asteroids[i] && asteroids[i].y > canvas.height) {
+                            if (asteroids[i] && asteroids[i].y > originalCanvasHeight) {
                                 asteroids.splice(i, 1);
                                 i--; // Adjust index after removal
                             }
@@ -1996,6 +2306,7 @@
                         drawPlayer();
                         drawBullets();
                         drawAsteroids();
+                        requestAnimationFrame(updateGame); // Use requestAnimationFrame
                     }
 
                     function startGame() {
@@ -2004,20 +2315,20 @@
                         gameRunning = true;
                         startButton.disabled = true;
                         resetButton.disabled = false;
-                        gameLoopInterval = setInterval(updateGame, 1000 / 60); // 60 FPS
+                        gameLoopInterval = requestAnimationFrame(updateGame); // Use requestAnimationFrame
                     }
 
                     function endGame() {
                         gameRunning = false;
-                        clearInterval(gameLoopInterval);
+                        cancelAnimationFrame(gameLoopInterval);
                         scoreDisplay.textContent = 'Game Over! Final Score: ' + score;
                         startButton.disabled = false;
                         resetButton.disabled = false;
                     }
 
                     function resetGame() {
-                        clearInterval(gameLoopInterval);
-                        player = { x: canvas.width / 2 - 15, y: canvas.height - 40, width: 30, height: 30, speed: 5 };
+                        cancelAnimationFrame(gameLoopInterval);
+                        player = { x: originalCanvasWidth / 2 - 15, y: originalCanvasHeight - 40, width: 30, height: 30, speed: 5 }; // Reset to original coordinates
                         bullets = [];
                         asteroids = [];
                         score = 0;
@@ -2034,9 +2345,11 @@
 
                     startButton.addEventListener('click', startGame);
                     resetButton.addEventListener('click', resetGame);
+                    window.addEventListener('resize', resizeCanvas); // Add resize listener
 
                     // Initial setup
                     resetGame();
+                    resizeCanvas(); // Set initial canvas size
                 }
             },
             {
@@ -2053,8 +2366,13 @@
                         <canvas id="racingCanvas" width="300" height="500" class="border-4 border-gray-700"></canvas>
                         <p id="racingScore" class="text-xl font-bold mt-2 mb-4">Score: 0</p>
                         <div class="canvas-game-controls">
-                            <button id="racingStartButton">Start Game</a></button>
+                            <button id="racingStartButton">Start Game</button>
                             <button id="racingResetButton" class="ml-4">Reset Game</button>
+                        </div>
+                        <!-- Mobile Controls -->
+                        <div class="flex justify-center gap-4 mt-4">
+                            <button id="racingLeft" class="d-button">⬅️</button>
+                            <button id="racingRight" class="d-button">➡️</button>
                         </div>
                         <p id="racingGameMessage" class="text-lg mt-4 font-semibold text-gray-300 game-message-area"></p>
                         <div class="game-instructions">
@@ -2062,8 +2380,8 @@
                             <p>Apni car ko left aur right move karein taaki upar se aane wale obstacles se bach sakein. Har obstacle se bachne par score badhega. Obstacle se takrane par game over ho jayega. 100 score banane par aapko ${25} coins milenge!</p>
                             <h4>Controls:</h4>
                             <ul>
-                                <li><strong>Left Arrow:</strong> Car ko left move karne ke liye.</li>
-                                <li><strong>Right Arrow:</strong> Car ko right move karne ke liye.</li>
+                                <li><strong>Left Arrow / Touch Left Button:</strong> Car ko left move karne ke liye.</li>
+                                <li><strong>Right Arrow / Touch Right Button:</strong> Car ko right move karne ke liye.</li>
                             </ul>
                         </div>
                     </div>
@@ -2077,6 +2395,10 @@
                     const racingGameMessage = document.getElementById('racingGameMessage');
                     const gameInstance = games.find(g => g.id === 'simple-racing');
 
+                    // Mobile control buttons
+                    const racingLeft = document.getElementById('racingLeft');
+                    const racingRight = document.getElementById('racingRight');
+
                     let player = { x: canvas.width / 2 - 25, y: canvas.height - 70, width: 50, height: 80, speed: 5 };
                     let obstacles = [];
                     let score = 0;
@@ -2085,19 +2407,53 @@
                     let keys = {}; // To track pressed keys
                     let coinsAwarded = false;
 
+                    // Original canvas dimensions for scaling reference
+                    const originalCanvasWidth = 300;
+                    const originalCanvasHeight = 500;
+
+                    // Adjust canvas size for responsiveness
+                    const resizeCanvas = () => {
+                        const container = canvas.parentElement;
+                        const maxWidth = container.clientWidth;
+                        const aspectRatio = originalCanvasWidth / originalCanvasHeight;
+
+                        let newWidth = maxWidth;
+                        let newHeight = newWidth / aspectRatio;
+
+                        if (newWidth > originalCanvasWidth) { // Limit max width to original canvas width
+                            newWidth = originalCanvasWidth;
+                            newHeight = originalCanvasHeight;
+                        }
+
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+                        drawPlayer();
+                        drawObstacles();
+                    };
+
                     // Event listeners for player movement
                     document.addEventListener('keydown', (e) => { keys[e.key] = true; });
                     document.addEventListener('keyup', (e) => { keys[e.key] = false; });
 
+                    // Touch control handlers
+                    racingLeft.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowLeft'] = true; });
+                    racingLeft.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowLeft'] = false; });
+                    racingRight.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowRight'] = true; });
+                    racingRight.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowRight'] = false; });
+
                     function drawPlayer() {
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
                         ctx.fillStyle = 'blue';
-                        ctx.fillRect(player.x, player.y, player.width, player.height);
+                        ctx.fillRect(player.x * scaleX, player.y * scaleY, player.width * scaleX, player.height * scaleY);
                     }
 
                     function drawObstacles() {
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
                         ctx.fillStyle = 'red';
                         for (let i = 0; i < obstacles.length; i++) {
-                            ctx.fillRect(obstacles[i].x, obstacles[i].y, obstacles[i].width, obstacles[i].height);
+                            ctx.fillRect(obstacles[i].x * scaleX, obstacles[i].y * scaleY, obstacles[i].width * scaleX, obstacles[i].height * scaleY);
                         }
                     }
 
@@ -2106,18 +2462,18 @@
 
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                        // Player movement
+                        // Player movement (using original coordinates for logic, scaling for drawing)
                         if (keys['ArrowLeft'] && player.x > 0) {
                             player.x -= player.speed;
                         }
-                        if (keys['ArrowRight'] && player.x + player.width < canvas.width) {
+                        if (keys['ArrowRight'] && player.x + player.width < originalCanvasWidth) {
                             player.x += player.speed;
                         }
 
                         // Generate obstacles
                         if (Math.random() < 0.03) { // Chance to spawn obstacle
                             obstacles.push({
-                                x: Math.random() * (canvas.width - 50),
+                                x: Math.random() * (originalCanvasWidth - 50),
                                 y: -50,
                                 width: 40,
                                 height: 60,
@@ -2134,7 +2490,7 @@
 
                             obstacles[i].y += obstacles[i].speed;
 
-                            // Collision detection (AABB collision)
+                            // Collision detection (AABB collision, using original coordinates)
                             if (player.x < obstacles[i].x + obstacles[i].width &&
                                 player.x + player.width > obstacles[i].x &&
                                 player.y < obstacles[i].y + obstacles[i].height &&
@@ -2143,7 +2499,7 @@
                                 return;
                             }
 
-                            if (obstacles[i].y > canvas.height) {
+                            if (obstacles[i].y > originalCanvasHeight) {
                                 obstacles.splice(i, 1);
                                 i--; // Adjust index after removal
                                 score += 10; // Score for avoiding an obstacle
@@ -2159,6 +2515,7 @@
 
                         drawPlayer();
                         drawObstacles();
+                        requestAnimationFrame(updateGame); // Use requestAnimationFrame
                     }
 
                     function startGame() {
@@ -2167,12 +2524,12 @@
                         gameRunning = true;
                         startButton.disabled = true;
                         resetButton.disabled = false;
-                        gameLoopInterval = setInterval(updateGame, 1000 / 60); // 60 FPS
+                        gameLoopInterval = requestAnimationFrame(updateGame); // Use requestAnimationFrame
                     }
 
                     function endGame() {
                         gameRunning = false;
-                        clearInterval(gameLoopInterval);
+                        cancelAnimationFrame(gameLoopInterval);
                         scoreDisplay.textContent = 'Game Over! Final Score: ' + score;
                         startButton.disabled = false;
                         resetButton.disabled = false;
@@ -2180,7 +2537,7 @@
 
                     function resetGame() {
                         clearInterval(gameLoopInterval);
-                        player = { x: canvas.width / 2 - 25, y: canvas.height - 70, width: 50, height: 80, speed: 5 };
+                        player = { x: originalCanvasWidth / 2 - 25, y: originalCanvasHeight - 70, width: 50, height: 80, speed: 5 }; // Reset to original coordinates
                         obstacles = [];
                         score = 0;
                         racingGameMessage.textContent = '';
@@ -2196,9 +2553,11 @@
 
                     startButton.addEventListener('click', startGame);
                     resetButton.addEventListener('click', resetGame);
+                    window.addEventListener('resize', resizeCanvas); // Add resize listener
 
                     // Initial setup
                     resetGame();
+                    resizeCanvas(); // Set initial canvas size
                 }
             },
             {
@@ -2218,14 +2577,27 @@
                             <button id="pongStartButton">Start Game</button>
                             <button id="pongResetButton" class="ml-4">Reset Game</button>
                         </div>
+                        <!-- Mobile Controls -->
+                        <div class="flex justify-around w-full mt-4">
+                            <div class="flex flex-col items-center">
+                                <h5 class="text-lg font-semibold text-gray-300 mb-2">Player 1</h5>
+                                <button id="p1Up" class="d-button mb-2">⬆️</button>
+                                <button id="p1Down" class="d-button">⬇️</button>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <h5 class="text-lg font-semibold text-gray-300 mb-2">Player 2</h5>
+                                <button id="p2Up" class="d-button mb-2">⬆️</button>
+                                <button id="p2Down" class="d-button">⬇️</button>
+                            </div>
+                        </div>
                         <p id="pongGameMessage" class="text-lg mt-4 font-semibold text-gray-300 game-message-area"></p>
                         <div class="game-instructions">
                             <h4>Kaise Khelein:</h4>
                             <p>Yeh ek 2-player game hai. Har player apne paddle ko control karta hai aur ball ko dusre player ke paas se nikalne ki koshish karta hai. Jab ball ek player ke paddle se chhoot jaati hai, toh dusre player ko point milta hai. Jo player pehle 5 points banayega, woh jeet jayega aur ${20} coins milenge!</p>
                             <h4>Controls:</h4>
                             <ul>
-                                <li><strong>Player 1 (Left Paddle):</strong> 'W' (upar), 'S' (neeche).</li>
-                                <li><strong>Player 2 (Right Paddle):</strong> 'Up Arrow' (upar), 'Down Arrow' (neeche).</li>
+                                <li><strong>Player 1 (Left Paddle):</strong> 'W' (upar), 'S' (neeche) ya Touch Up/Down buttons.</li>
+                                <li><strong>Player 2 (Right Paddle):</strong> 'Up Arrow' (upar), 'Down Arrow' (neeche) ya Touch Up/Down buttons.</li>
                             </ul>
                         </div>
                     </div>
@@ -2240,6 +2612,12 @@
                     const pongGameMessage = document.getElementById('pongGameMessage');
                     const gameInstance = games.find(g => g.id === 'pong-game');
 
+                    // Mobile control buttons
+                    const p1Up = document.getElementById('p1Up');
+                    const p1Down = document.getElementById('p1Down');
+                    const p2Up = document.getElementById('p2Up');
+                    const p2Down = document.getElementById('p2Down');
+
                     let player1 = { x: 10, y: canvas.height / 2 - 30, width: 10, height: 60, score: 0, speed: 4 };
                     let player2 = { x: canvas.width - 20, y: canvas.height / 2 - 30, width: 10, height: 60, score: 0, speed: 4 };
                     let ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 7, dx: 3, dy: 3 };
@@ -2248,39 +2626,77 @@
                     let keys = {};
                     let coinsAwarded = { player1: false, player2: false };
 
+                    // Original canvas dimensions for scaling reference
+                    const originalCanvasWidth = 400;
+                    const originalCanvasHeight = 300;
+
+                    // Adjust canvas size for responsiveness
+                    const resizeCanvas = () => {
+                        const container = canvas.parentElement;
+                        const maxWidth = container.clientWidth;
+                        const aspectRatio = originalCanvasWidth / originalCanvasHeight;
+
+                        let newWidth = maxWidth;
+                        let newHeight = newWidth / aspectRatio;
+
+                        if (newWidth > originalCanvasWidth) { // Limit max width to original canvas width
+                            newWidth = originalCanvasWidth;
+                            newHeight = originalCanvasHeight;
+                        }
+
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+                        draw(); // Redraw game elements after resize
+                    };
+
                     document.addEventListener('keydown', (e) => { keys[e.key] = true; });
                     document.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+                    // Touch control handlers
+                    p1Up.addEventListener('touchstart', (e) => { e.preventDefault(); keys['w'] = true; });
+                    p1Up.addEventListener('touchend', (e) => { e.preventDefault(); keys['w'] = false; });
+                    p1Down.addEventListener('touchstart', (e) => { e.preventDefault(); keys['s'] = true; });
+                    p1Down.addEventListener('touchend', (e) => { e.preventDefault(); keys['s'] = false; });
+
+                    p2Up.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowUp'] = true; });
+                    p2Up.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowUp'] = false; });
+                    p2Down.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowDown'] = true; });
+                    p2Down.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowDown'] = false; });
+
 
                     function draw() {
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
                         ctx.fillStyle = 'white';
 
-                        // Draw paddles
-                        ctx.fillRect(player1.x, player1.y, player1.width, player1.height);
-                        ctx.fillRect(player2.x, player2.y, player2.width, player2.height);
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
 
-                        // Draw ball
+                        // Draw paddles (scaled)
+                        ctx.fillRect(player1.x * scaleX, player1.y * scaleY, player1.width * scaleX, player1.height * scaleY);
+                        ctx.fillRect(player2.x * scaleX, player2.y * scaleY, player2.width * scaleX, player2.height * scaleY);
+
+                        // Draw ball (scaled)
                         ctx.beginPath();
-                        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                        ctx.arc(ball.x * scaleX, ball.y * scaleY, ball.radius * scaleX, 0, Math.PI * 2);
                         ctx.fill();
                     }
 
                     function updateGame() {
                         if (!gameRunning) return;
 
-                        // Player 1 movement (W/S)
+                        // Player 1 movement (using original coordinates for logic)
                         if (keys['w'] && player1.y > 0) {
                             player1.y -= player1.speed;
                         }
-                        if (keys['s'] && player1.y + player1.height < canvas.height) {
+                        if (keys['s'] && player1.y + player1.height < originalCanvasHeight) {
                             player1.y += player1.speed;
                         }
 
-                        // Player 2 movement (Up/Down Arrows)
+                        // Player 2 movement (using original coordinates for logic)
                         if (keys['ArrowUp'] && player2.y > 0) {
                             player2.y -= player2.speed;
                         }
-                        if (keys['ArrowDown'] && player2.y + player2.height < canvas.height) {
+                        if (keys['ArrowDown'] && player2.y + player2.height < originalCanvasHeight) {
                             player2.y += player2.speed;
                         }
 
@@ -2288,12 +2704,12 @@
                         ball.x += ball.dx;
                         ball.y += ball.dy;
 
-                        // Ball collision with top/bottom walls
-                        if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+                        // Ball collision with top/bottom walls (using original coordinates)
+                        if (ball.y - ball.radius < 0 || ball.y + ball.radius > originalCanvasHeight) {
                             ball.dy *= -1; // Reverse vertical direction
                         }
 
-                        // Ball collision with paddles
+                        // Ball collision with paddles (using original coordinates)
                         // Player 1 paddle
                         if (ball.x - ball.radius < player1.x + player1.width &&
                             ball.y > player1.y && ball.y < player1.y + player1.height) {
@@ -2307,25 +2723,27 @@
                             ball.x = player2.x - ball.radius; // Prevent sticking
                         }
 
-                        // Ball out of bounds (scoring)
+                        // Ball out of bounds (scoring, using original coordinates)
                         if (ball.x - ball.radius < 0) { // Player 2 scores
                             player2.score++;
                             player2ScoreDisplay.textContent = player2.score;
-                            if (gameInstance.winCondition(player2.score, player1.score)) {
+                            if (gameInstance.winCondition(player2.score, player1.score) && !coinsAwarded.player2) {
                                 pongGameMessage.textContent = `Player 2 jeet gaya! 🎉 Aapko ${gameInstance.coinReward} coins mile!`;
                                 pongGameMessage.classList.add('text-green-400');
                                 awardCoins(gameInstance.coinReward);
+                                coinsAwarded.player2 = true;
                                 endGame();
                             } else {
                                 resetBall();
                             }
-                        } else if (ball.x + ball.radius > canvas.width) { // Player 1 scores
+                        } else if (ball.x + ball.radius > originalCanvasWidth) { // Player 1 scores
                             player1.score++;
                             player1ScoreDisplay.textContent = player1.score;
-                            if (gameInstance.winCondition(player1.score, player2.score)) {
+                            if (gameInstance.winCondition(player1.score, player2.score) && !coinsAwarded.player1) {
                                 pongGameMessage.textContent = `Player 1 jeet gaya! 🎉 Aapko ${gameInstance.coinReward} coins mile!`;
                                 pongGameMessage.classList.add('text-green-400');
                                 awardCoins(gameInstance.coinReward);
+                                coinsAwarded.player1 = true;
                                 endGame();
                             } else {
                                 resetBall();
@@ -2333,11 +2751,12 @@
                         }
 
                         draw();
+                        requestAnimationFrame(updateGame); // Use requestAnimationFrame
                     }
 
                     function resetBall() {
-                        ball.x = canvas.width / 2;
-                        ball.y = canvas.height / 2;
+                        ball.x = originalCanvasWidth / 2;
+                        ball.y = originalCanvasHeight / 2;
                         ball.dx = (Math.random() > 0.5 ? 1 : -1) * 3; // Random initial direction
                         ball.dy = (Math.random() > 0.5 ? 1 : -1) * 3;
                     }
@@ -2350,21 +2769,21 @@
                         resetButton.disabled = false;
                         pongGameMessage.textContent = '';
                         pongGameMessage.classList.remove('text-green-400');
-                        gameLoopInterval = setInterval(updateGame, 1000 / 60); // 60 FPS
+                        gameLoopInterval = requestAnimationFrame(updateGame); // Use requestAnimationFrame
                     }
 
                     function endGame() {
                         gameRunning = false;
-                        clearInterval(gameLoopInterval);
+                        cancelAnimationFrame(gameLoopInterval);
                         startButton.disabled = false;
                         resetButton.disabled = false;
                     }
 
                     function resetGame() {
-                        clearInterval(gameLoopInterval);
-                        player1 = { x: 10, y: canvas.height / 2 - 30, width: 10, height: 60, score: 0, speed: 4 };
-                        player2 = { x: canvas.width - 20, y: canvas.height / 2 - 30, width: 10, height: 60, score: 0, speed: 4 };
-                        ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 7, dx: 3, dy: 3 };
+                        cancelAnimationFrame(gameLoopInterval);
+                        player1 = { x: 10, y: originalCanvasHeight / 2 - 30, width: 10, height: 60, score: 0, speed: 4 }; // Reset to original coords
+                        player2 = { x: originalCanvasWidth - 20, y: originalCanvasHeight / 2 - 30, width: 10, height: 60, score: 0, speed: 4 }; // Reset to original coords
+                        ball = { x: originalCanvasWidth / 2, y: originalCanvasHeight / 2, radius: 7, dx: 3, dy: 3 }; // Reset to original coords
                         player1ScoreDisplay.textContent = '0';
                         player2ScoreDisplay.textContent = '0';
                         pongGameMessage.textContent = '';
@@ -2379,8 +2798,10 @@
 
                     startButton.addEventListener('click', startGame);
                     resetButton.addEventListener('click', resetGame);
+                    window.addEventListener('resize', resizeCanvas); // Add resize listener
 
                     resetGame();
+                    resizeCanvas(); // Set initial canvas size
                 }
             },
             {
@@ -2400,14 +2821,19 @@
                             <button id="brickBreakerStartButton">Start Game</button>
                             <button id="brickBreakerResetButton" class="ml-4">Reset Game</button>
                         </div>
+                        <!-- Mobile Controls -->
+                        <div class="flex justify-center gap-4 mt-4">
+                            <button id="bbLeft" class="d-button">⬅️</button>
+                            <button id="bbRight" class="d-button">➡️</button>
+                        </div>
                         <p id="brickBreakerGameMessage" class="text-lg mt-4 font-semibold text-gray-300 game-message-area"></p>
                         <div class="game-instructions">
                             <h4>Kaise Khelein:</h4>
                             <p>Paddle ko control karein aur ball ko upar ki taraf bounce karein taaki woh bricks ko tod sake. Saare bricks todne par aap jeet jaayenge aur ${40} coins milenge! Agar ball neeche gir jaati hai, toh game over.</p>
                             <h4>Controls:</h4>
                             <ul>
-                                <li><strong>Left Arrow:</strong> Paddle ko left move karne ke liye.</li>
-                                <li><strong>Right Arrow:</strong> Paddle ko right move karne ke liye.</li>
+                                <li><strong>Left Arrow / Touch Left Button:</strong> Paddle ko left move karne ke liye.</li>
+                                <li><strong>Right Arrow / Touch Right Button:</strong> Paddle ko right move karne ke liye.</li>
                             </ul>
                         </div>
                     </div>
@@ -2420,6 +2846,10 @@
                     const resetButton = document.getElementById('brickBreakerResetButton');
                     const brickBreakerGameMessage = document.getElementById('brickBreakerGameMessage');
                     const gameInstance = games.find(g => g.id === 'brick-breaker');
+
+                    // Mobile control buttons
+                    const bbLeft = document.getElementById('bbLeft');
+                    const bbRight = document.getElementById('bbRight');
 
                     let ball = { x: canvas.width / 2, y: canvas.height - 30, radius: 10, dx: 2, dy: -2 };
                     let paddle = { x: canvas.width / 2 - 40, y: canvas.height - 20, width: 80, height: 10, speed: 7 };
@@ -2438,6 +2868,31 @@
                     let leftPressed = false;
                     let coinsAwarded = false;
 
+                    // Original canvas dimensions for scaling reference
+                    const originalCanvasWidth = 480;
+                    const originalCanvasHeight = 320;
+
+                    // Adjust canvas size for responsiveness
+                    const resizeCanvas = () => {
+                        const container = canvas.parentElement;
+                        const maxWidth = container.clientWidth;
+                        const aspectRatio = originalCanvasWidth / originalCanvasHeight;
+
+                        let newWidth = maxWidth;
+                        let newHeight = newWidth / aspectRatio;
+
+                        if (newWidth > originalCanvasWidth) { // Limit max width to original canvas width
+                            newWidth = originalCanvasWidth;
+                            newHeight = originalCanvasHeight;
+                        }
+
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+                        drawBricks(); // Redraw bricks after resize
+                        drawBall();
+                        drawPaddle();
+                    };
+
                     document.addEventListener('keydown', (e) => {
                         if (e.key === 'Right' || e.key === 'ArrowRight') rightPressed = true;
                         else if (e.key === 'Left' || e.key === 'ArrowLeft') leftPressed = true;
@@ -2446,6 +2901,13 @@
                         if (e.key === 'Right' || e.key === 'ArrowRight') rightPressed = false;
                         else if (e.key === 'Left' || e.key === 'ArrowLeft') leftPressed = false;
                     });
+
+                    // Touch control handlers
+                    bbLeft.addEventListener('touchstart', (e) => { e.preventDefault(); leftPressed = true; });
+                    bbLeft.addEventListener('touchend', (e) => { e.preventDefault(); leftPressed = false; });
+                    bbRight.addEventListener('touchstart', (e) => { e.preventDefault(); rightPressed = true; });
+                    bbRight.addEventListener('touchend', (e) => { e.preventDefault(); rightPressed = false; });
+
 
                     function createBricks() {
                         bricks = [];
@@ -2458,31 +2920,37 @@
                     }
 
                     function drawBricks() {
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
                         for (let c = 0; c < brickColumnCount; c++) {
                             for (let r = 0; r < brickRowCount; r++) {
                                 if (bricks[c][r].status === 1) {
                                     let brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
                                     let brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
-                                    bricks[c][r].x = brickX;
-                                    bricks[c][r].y = brickY;
+                                    bricks[c][r].x = brickX; // Store original coordinates
+                                    bricks[c][r].y = brickY; // Store original coordinates
                                     ctx.fillStyle = '#0095DD'; // Blue bricks
-                                    ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+                                    ctx.fillRect(brickX * scaleX, brickY * scaleY, brickWidth * scaleX, brickHeight * scaleY);
                                 }
                             }
                         }
                     }
 
                     function drawBall() {
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
                         ctx.beginPath();
-                        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                        ctx.arc(ball.x * scaleX, ball.y * scaleY, ball.radius * scaleX, 0, Math.PI * 2);
                         ctx.fillStyle = '#0095DD';
                         ctx.fill();
                         ctx.closePath();
                     }
 
                     function drawPaddle() {
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
                         ctx.fillStyle = '#0095DD';
-                        ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+                        ctx.fillRect(paddle.x * scaleX, paddle.y * scaleY, paddle.width * scaleX, paddle.height * scaleY);
                     }
 
                     function collisionDetection() {
@@ -2492,6 +2960,7 @@
                                 let b = bricks[c][r];
                                 if (b.status === 1) {
                                     activeBricks++;
+                                    // Collision using original coordinates
                                     if (ball.x + ball.radius > b.x && ball.x - ball.radius < b.x + brickWidth &&
                                         ball.y + ball.radius > b.y && ball.y - ball.radius < b.y + brickHeight) {
                                         ball.dy *= -1; // Reverse ball direction
@@ -2520,17 +2989,17 @@
                         drawPaddle();
                         collisionDetection();
 
-                        // Ball movement
+                        // Ball movement (using original coordinates)
                         ball.x += ball.dx;
                         ball.y += ball.dy;
 
-                        // Ball collision with walls
-                        if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
+                        // Ball collision with walls (using original coordinates)
+                        if (ball.x + ball.radius > originalCanvasWidth || ball.x - ball.radius < 0) {
                             ball.dx *= -1;
                         }
                         if (ball.y - ball.radius < 0) { // Top wall
                             ball.dy *= -1;
-                        } else if (ball.y + ball.radius > canvas.height - paddle.height) { // Bottom wall (paddle area)
+                        } else if (ball.y + ball.radius > originalCanvasHeight - paddle.height) { // Bottom wall (paddle area, original height)
                             if (ball.x > paddle.x && ball.x < paddle.x + paddle.width) { // Collision with paddle
                                 ball.dy *= -1;
                             } else { // Ball missed paddle
@@ -2539,12 +3008,13 @@
                             }
                         }
 
-                        // Paddle movement
-                        if (rightPressed && paddle.x + paddle.width < canvas.width) {
+                        // Paddle movement (using original coordinates)
+                        if (rightPressed && paddle.x + paddle.width < originalCanvasWidth) {
                             paddle.x += paddle.speed;
                         } else if (leftPressed && paddle.x > 0) {
                             paddle.x -= paddle.speed;
                         }
+                        requestAnimationFrame(updateGame); // Use requestAnimationFrame
                     }
 
                     function startGame() {
@@ -2555,21 +3025,21 @@
                         resetButton.disabled = false;
                         brickBreakerGameMessage.textContent = '';
                         brickBreakerGameMessage.classList.remove('text-green-400');
-                        gameLoopInterval = setInterval(updateGame, 1000 / 60); // 60 FPS
+                        gameLoopInterval = requestAnimationFrame(updateGame); // Use requestAnimationFrame
                     }
 
                     function endGame() {
                         gameRunning = false;
-                        clearInterval(gameLoopInterval);
+                        cancelAnimationFrame(gameLoopInterval);
                         scoreDisplay.textContent = 'Game Over! Final Score: ' + score;
                         startButton.disabled = false;
                         resetButton.disabled = false;
                     }
 
                     function resetGame() {
-                        clearInterval(gameLoopInterval);
-                        ball = { x: canvas.width / 2, y: canvas.height - 30, radius: 10, dx: 2, dy: -2 };
-                        paddle = { x: canvas.width / 2 - 40, y: canvas.height - 20, width: 80, height: 10, speed: 7 };
+                        cancelAnimationFrame(gameLoopInterval);
+                        ball = { x: originalCanvasWidth / 2, y: originalCanvasHeight - 30, radius: 10, dx: 2, dy: -2 }; // Reset to original coords
+                        paddle = { x: originalCanvasWidth / 2 - 40, y: originalCanvasHeight - 20, width: 80, height: 10, speed: 7 }; // Reset to original coords
                         score = 0;
                         brickBreakerGameMessage.textContent = '';
                         brickBreakerGameMessage.classList.remove('text-green-400');
@@ -2587,8 +3057,10 @@
 
                     startButton.addEventListener('click', startGame);
                     resetButton.addEventListener('click', resetGame);
+                    window.addEventListener('resize', resizeCanvas); // Add resize listener
 
                     resetGame(); // Initial draw
+                    resizeCanvas(); // Set initial canvas size
                 }
             },
             {
@@ -2614,7 +3086,7 @@
                             <p>Moles (holes se nikalne wale targets) par click karein jab woh dikhein. Jitni jaldi click karenge, utne points milenge. Agar aap mole ko miss karte hain ya woh wapas chala jaata hai, toh score nahi milega. 30 seconds mein 20 ya usse zyada score banane par aapko ${30} coins milenge!</p>
                             <h4>Controls:</h4>
                             <ul>
-                                <li><strong>Mouse Click:</strong> Moles par click karne ke liye.</li>
+                                <li><strong>Mouse Click / Tap:</strong> Moles par click/tap karne ke liye.</li>
                             </ul>
                         </div>
                     </div>
@@ -2640,14 +3112,38 @@
                     const holeColor = '#4a5568'; // Dark gray
                     const moleColor = '#9a3412'; // Brownish
 
+                    // Original canvas dimensions for scaling reference
+                    const originalCanvasWidth = 400;
+                    const originalCanvasHeight = 400;
+
+                    // Adjust canvas size for responsiveness
+                    const resizeCanvas = () => {
+                        const container = canvas.parentElement;
+                        const maxWidth = container.clientWidth;
+                        const aspectRatio = originalCanvasWidth / originalCanvasHeight;
+
+                        let newWidth = maxWidth;
+                        let newHeight = newWidth / aspectRatio;
+
+                        if (newWidth > originalCanvasWidth) { // Limit max width to original canvas width
+                            newWidth = originalCanvasWidth;
+                            newHeight = originalCanvasHeight;
+                        }
+
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+                        drawGame(); // Redraw game elements after resize
+                    };
+
+
                     function createHoles() {
-                        // Create a grid of holes
+                        // Create a grid of holes (using original coordinates)
                         moles = [];
                         const rows = 3;
                         const cols = 3;
                         const padding = 50;
-                        const spacingX = (canvas.width - 2 * padding) / (cols - 1);
-                        const spacingY = (canvas.height - 2 * padding) / (rows - 1);
+                        const spacingX = (originalCanvasWidth - 2 * padding) / (cols - 1);
+                        const spacingY = (originalCanvasHeight - 2 * padding) / (rows - 1);
 
                         for (let r = 0; r < rows; r++) {
                             for (let c = 0; c < cols; c++) {
@@ -2666,15 +3162,18 @@
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
                         ctx.fillStyle = holeColor;
 
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
+
                         moles.forEach(mole => {
                             ctx.beginPath();
-                            ctx.arc(mole.x, mole.y, mole.radius, 0, Math.PI * 2);
+                            ctx.arc(mole.x * scaleX, mole.y * scaleY, mole.radius * scaleX, 0, Math.PI * 2);
                             ctx.fill();
 
                             if (mole.isUp) {
                                 ctx.fillStyle = mole.hit ? 'green' : moleColor; // Green if hit
                                 ctx.beginPath();
-                                ctx.arc(mole.x, mole.y, mole.radius * 0.8, 0, Math.PI * 2);
+                                ctx.arc(mole.x * scaleX, mole.y * scaleY, mole.radius * 0.8 * scaleX, 0, Math.PI * 2);
                                 ctx.fill();
                             }
                         });
@@ -2711,8 +3210,9 @@
                         if (!gameRunning) return;
 
                         const rect = canvas.getBoundingClientRect();
-                        const clickX = event.clientX - rect.left;
-                        const clickY = event.clientY - rect.top;
+                        // Adjust click coordinates to original canvas scale
+                        const clickX = (event.clientX - rect.left) * (originalCanvasWidth / canvas.width);
+                        const clickY = (event.clientY - rect.top) * (originalCanvasHeight / canvas.height);
 
                         moles.forEach(mole => {
                             if (mole.isUp && !mole.hit) {
@@ -2784,26 +3284,13 @@
                         coinsAwarded = false; // Reset coin award status
                     }
 
-                    // Add start/reset buttons dynamically since they are not in HTML
-                    if (!document.getElementById('mazeStartButton')) {
-                        const controlsDiv = canvas.parentElement.querySelector('.canvas-game-controls');
-                        const startBtn = document.createElement('button');
-                        startBtn.id = 'mazeStartButton';
-                        startBtn.textContent = 'Start Game';
-                        startBtn.className = 'bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300';
-                        controlsDiv.appendChild(startBtn);
+                    canvas.addEventListener('click', handleCanvasClick);
+                    startButton.addEventListener('click', startGame);
+                    resetButton.addEventListener('click', resetGame);
+                    window.addEventListener('resize', resizeCanvas); // Add resize listener
 
-                        const resetBtn = document.createElement('button');
-                        resetBtn.id = 'mazeResetButton';
-                        resetBtn.textContent = 'Reset Game';
-                        resetBtn.className = 'ml-4 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300';
-                        controlsDiv.appendChild(resetBtn);
-
-                        startBtn.addEventListener('click', startGame);
-                        resetBtn.addEventListener('click', resetGame);
-                    }
-
-                    resetGame(); // Initial draw
+                    resetGame(); // Initial setup
+                    resizeCanvas(); // Set initial canvas size
                 }
             },
             {
@@ -2823,12 +3310,25 @@
                             <button id="mazeStartButton">Start Game</button>
                             <button id="mazeResetButton" class="ml-4">Reset Game</button>
                         </div>
+                        <!-- Mobile Controls -->
+                        <div class="d-pad">
+                            <div class="d-button empty"></div>
+                            <div class="d-button" id="mazeUp">⬆️</div>
+                            <div class="d-button empty"></div>
+                            <div class="d-button" id="mazeLeft">⬅️</div>
+                            <div class="d-button empty"></div>
+                            <div class="d-button" id="mazeRight">➡️</div>
+                            <div class="d-button empty"></div>
+                            <div class="d-button" id="mazeDown">⬇️</div>
+                            <div class="d-button empty"></div>
+                        </div>
                         <div class="game-instructions">
                             <h4>Kaise Khelein:</h4>
                             <p>Ball ko maze ke andar se navigate karein aur exit point (green square) tak pahunchayein. Deewaron se takrane se bachein. Maze solve karne par aapko ${20} coins milenge!</p>
                             <h4>Controls:</h4>
                             <ul>
                                 <li><strong>Arrow Keys (Up, Down, Left, Right):</strong> Ball ko move karne ke liye.</li>
+                                <li><strong>Touch D-Pad:</strong> Mobile par disha badalne ke liye.</li>
                             </ul>
                         </div>
                     </div>
@@ -2841,9 +3341,15 @@
                     const resetButton = document.getElementById('mazeResetButton');
                     const gameInstance = games.find(g => g.id === 'simple-maze');
 
+                    // Mobile control buttons
+                    const mazeUp = document.getElementById('mazeUp');
+                    const mazeDown = document.getElementById('mazeDown');
+                    const mazeLeft = document.getElementById('mazeLeft');
+                    const mazeRight = document.getElementById('mazeRight');
+
                     const cellSize = 30;
-                    const mazeWidth = canvas.width / cellSize;
-                    const mazeHeight = canvas.height / cellSize;
+                    const originalMazeWidth = 10; // 300 / 30
+                    const originalMazeHeight = 10; // 300 / 30
 
                     let maze = [
                         [1,1,1,1,1,1,1,1,1,1],
@@ -2864,29 +3370,68 @@
                     let keys = {};
                     let coinsAwarded = false;
 
+                    // Original canvas dimensions for scaling reference
+                    const originalCanvasWidth = 300;
+                    const originalCanvasHeight = 300;
+
+                    // Adjust canvas size for responsiveness
+                    const resizeCanvas = () => {
+                        const container = canvas.parentElement;
+                        const maxWidth = container.clientWidth;
+                        const aspectRatio = originalCanvasWidth / originalCanvasHeight;
+
+                        let newWidth = maxWidth;
+                        let newHeight = newWidth / aspectRatio;
+
+                        if (newWidth > originalCanvasWidth) { // Limit max width to original canvas width
+                            newWidth = originalCanvasWidth;
+                            newHeight = originalCanvasHeight;
+                        }
+
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+                        drawMaze(); // Redraw maze after resize
+                        drawPlayer();
+                    };
+
                     document.addEventListener('keydown', (e) => { keys[e.key] = true; });
                     document.addEventListener('keyup', (e) => { keys[e.key] = false; });
 
+                    // Touch control handlers
+                    mazeUp.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowUp'] = true; });
+                    mazeUp.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowUp'] = false; });
+                    mazeDown.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowDown'] = true; });
+                    mazeDown.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowDown'] = false; });
+                    mazeLeft.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowLeft'] = true; });
+                    mazeLeft.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowLeft'] = false; });
+                    mazeRight.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowRight'] = true; });
+                    mazeRight.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowRight'] = false; });
+
+
                     function drawMaze() {
-                        for (let r = 0; r < mazeHeight; r++) {
-                            for (let c = 0; c < mazeWidth; c++) {
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
+                        for (let r = 0; r < originalMazeHeight; r++) {
+                            for (let c = 0; c < originalMazeWidth; c++) {
                                 if (maze[r][c] === 1) { // Wall
                                     ctx.fillStyle = '#4a5568'; // Dark gray wall
-                                    ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+                                    ctx.fillRect(c * cellSize * scaleX, r * cellSize * scaleY, cellSize * scaleX, cellSize * scaleY);
                                 } else if (maze[r][c] === 2) { // Exit
                                     ctx.fillStyle = '#27ae60'; // Green exit
-                                    ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+                                    ctx.fillRect(c * cellSize * scaleX, r * cellSize * scaleY, cellSize * scaleX, cellSize * scaleY);
                                 } else { // Path
                                     ctx.fillStyle = '#1a202c'; // Background color
-                                    ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+                                    ctx.fillRect(c * cellSize * scaleX, r * cellSize * scaleY, cellSize * scaleX, cellSize * scaleY);
                                 }
                             }
                         }
                     }
 
                     function drawPlayer() {
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
                         ctx.beginPath();
-                        ctx.arc(player.x * cellSize + cellSize / 2, player.y * cellSize + cellSize / 2, player.radius, 0, Math.PI * 2);
+                        ctx.arc(player.x * cellSize * scaleX + cellSize / 2 * scaleX, player.y * cellSize * scaleY + cellSize / 2 * scaleY, player.radius * scaleX, 0, Math.PI * 2);
                         ctx.fillStyle = 'yellow';
                         ctx.fill();
                         ctx.closePath();
@@ -2898,18 +3443,17 @@
                         let newPlayerX = player.x;
                         let newPlayerY = player.y;
 
+                        // Movement logic using original coordinates
                         if (keys['ArrowUp']) newPlayerY -= player.speed / cellSize;
                         if (keys['ArrowDown']) newPlayerY += player.speed / cellSize;
                         if (keys['ArrowLeft']) newPlayerX -= player.speed / cellSize;
                         if (keys['ArrowRight']) newPlayerX += player.speed / cellSize;
 
-                        // Clamp player position to canvas bounds
-                        newPlayerX = Math.max(0, Math.min(mazeWidth - (player.radius * 2 / cellSize), newPlayerX));
-                        newPlayerY = Math.max(0, Math.min(mazeHeight - (player.radius * 2 / cellSize), newPlayerY));
+                        // Clamp player position to original maze bounds
+                        newPlayerX = Math.max(0, Math.min(originalMazeWidth - (player.radius * 2 / cellSize), newPlayerX));
+                        newPlayerY = Math.max(0, Math.min(originalMazeHeight - (player.radius * 2 / cellSize), newPlayerY));
 
-                        // Check for wall collisions
-                        // This collision detection is simplified and might allow slight overlap.
-                        // For pixel-perfect collision, more complex logic is needed.
+                        // Check for wall collisions (using original coordinates)
                         const playerLeft = newPlayerX;
                         const playerRight = newPlayerX + (player.radius * 2 / cellSize);
                         const playerTop = newPlayerY;
@@ -2917,11 +3461,10 @@
 
                         let collided = false;
 
-                        // Check corners of the player's bounding box against maze walls
                         const checkCollisionAt = (x, y) => {
                             const cellX = Math.floor(x);
                             const cellY = Math.floor(y);
-                            return cellX >= 0 && cellX < mazeWidth && cellY >= 0 && cellY < mazeHeight && maze[cellY][cellX] === 1;
+                            return cellX >= 0 && cellX < originalMazeWidth && cellY >= 0 && cellY < originalMazeHeight && maze[cellY][cellX] === 1;
                         };
 
                         if (
@@ -2939,7 +3482,7 @@
                             player.y = newPlayerY;
                         }
 
-                        // Check for exit
+                        // Check for exit (using original coordinates)
                         const playerCenterCellX = Math.floor(player.x + player.radius / cellSize);
                         const playerCenterCellY = Math.floor(player.y + player.radius / cellSize);
 
@@ -2979,7 +3522,7 @@
 
                     function resetGame() {
                         cancelAnimationFrame(gameLoopId);
-                        player = { x: 1, y: 1, radius: cellSize / 3, speed: 2 };
+                        player = { x: 1, y: 1, radius: cellSize / 3, speed: 2 }; // Reset to original coords
                         mazeStatus.textContent = 'Maze solve karo!';
                         mazeStatus.classList.remove('text-green-400', 'text-red-400');
                         startButton.disabled = false;
@@ -2992,12 +3535,223 @@
 
                     startButton.addEventListener('click', startGame);
                     resetButton.addEventListener('click', resetGame);
+                    window.addEventListener('resize', resizeCanvas); // Add resize listener
 
                     resetGame(); // Initial draw
+                    resizeCanvas(); // Set initial canvas size
+                }
+            },
+            {
+                id: 'falling-items',
+                name: 'Falling Items',
+                imageUrl: 'https://placehold.co/400x250/20B2AA/FFFFFF?text=Falling+Items',
+                description: 'Falling items ko catch karo aur bombs se bacho!',
+                type: 'internal',
+                category: ['Arcade', 'Casual', 'New Games'],
+                coinReward: 25,
+                winCondition: (score) => score >= 100,
+                gameHtml: `
+                    <div class="game-canvas-container">
+                        <canvas id="fallingItemsCanvas" width="400" height="400" class="border-4 border-gray-700"></canvas>
+                        <p id="fallingItemsScore" class="text-xl font-bold mt-2 mb-4">Score: 0</p>
+                        <div class="canvas-game-controls">
+                            <button id="fallingItemsStartButton">Start Game</button>
+                            <button id="fallingItemsResetButton" class="ml-4">Reset Game</button>
+                        </div>
+                        <!-- Mobile Controls -->
+                        <div class="flex justify-center gap-4 mt-4">
+                            <button id="fiLeft" class="d-button">⬅️</button>
+                            <button id="fiRight" class="d-button">➡️</button>
+                        </div>
+                        <p id="fallingItemsGameMessage" class="text-lg mt-4 font-semibold text-gray-300 game-message-area"></p>
+                        <div class="game-instructions">
+                            <h4>Kaise Khelein:</h4>
+                            <p>Apne basket ko left aur right move karein. Upar se girte hue fruits (green) ko catch karein aur bombs (red) se bachein. Har fruit par score badhega, bomb se takrane par game over. 100 score banane par aapko ${25} coins milenge!</p>
+                            <h4>Controls:</h4>
+                            <ul>
+                                <li><strong>Left Arrow / Touch Left Button:</strong> Basket ko left move karne ke liye.</li>
+                                <li><strong>Right Arrow / Touch Right Button:</strong> Basket ko right move karne ke liye.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                gameScript: function() {
+                    const canvas = document.getElementById('fallingItemsCanvas');
+                    const ctx = canvas.getContext('2d');
+                    const scoreDisplay = document.getElementById('fallingItemsScore');
+                    const startButton = document.getElementById('fallingItemsStartButton');
+                    const resetButton = document.getElementById('fallingItemsResetButton');
+                    const gameMessage = document.getElementById('fallingItemsGameMessage');
+                    const gameInstance = games.find(g => g.id === 'falling-items');
+
+                    // Mobile control buttons
+                    const fiLeft = document.getElementById('fiLeft');
+                    const fiRight = document.getElementById('fiRight');
+
+                    let player = { x: canvas.width / 2 - 25, y: canvas.height - 60, width: 50, height: 10, speed: 7 };
+                    let fallingObjects = []; // Stores items (fruits or bombs)
+                    let score = 0;
+                    let gameRunning = false;
+                    let gameLoopInterval;
+                    let keys = {};
+                    let coinsAwarded = false;
+
+                    // Original canvas dimensions for scaling reference
+                    const originalCanvasWidth = 400;
+                    const originalCanvasHeight = 400;
+
+                    // Adjust canvas size for responsiveness
+                    const resizeCanvas = () => {
+                        const container = canvas.parentElement;
+                        const maxWidth = container.clientWidth;
+                        const aspectRatio = originalCanvasWidth / originalCanvasHeight;
+
+                        let newWidth = maxWidth;
+                        let newHeight = newWidth / aspectRatio;
+
+                        if (newWidth > originalCanvasWidth) { // Limit max width to original canvas width
+                            newWidth = originalCanvasWidth;
+                            newHeight = originalCanvasHeight;
+                        }
+
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+                        drawPlayer();
+                        drawFallingObjects();
+                    };
+
+                    document.addEventListener('keydown', (e) => { keys[e.key] = true; });
+                    document.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+                    // Touch control handlers
+                    fiLeft.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowLeft'] = true; });
+                    fiLeft.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowLeft'] = false; });
+                    fiRight.addEventListener('touchstart', (e) => { e.preventDefault(); keys['ArrowRight'] = true; });
+                    fiRight.addEventListener('touchend', (e) => { e.preventDefault(); keys['ArrowRight'] = false; });
+
+                    function drawPlayer() {
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
+                        ctx.fillStyle = 'blue';
+                        ctx.fillRect(player.x * scaleX, player.y * scaleY, player.width * scaleX, player.height * scaleY);
+                    }
+
+                    function drawFallingObjects() {
+                        const scaleX = canvas.width / originalCanvasWidth;
+                        const scaleY = canvas.height / originalCanvasHeight;
+                        for (let i = 0; i < fallingObjects.length; i++) {
+                            const obj = fallingObjects[i];
+                            ctx.fillStyle = obj.type === 'fruit' ? 'green' : 'red';
+                            ctx.beginPath();
+                            ctx.arc(obj.x * scaleX, obj.y * scaleY, obj.radius * scaleX, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+
+                    function updateGame() {
+                        if (!gameRunning) return;
+
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                        // Player movement (using original coordinates for logic)
+                        if (keys['ArrowLeft'] && player.x > 0) {
+                            player.x -= player.speed;
+                        }
+                        if (keys['ArrowRight'] && player.x + player.width < originalCanvasWidth) {
+                            player.x += player.speed;
+                        }
+
+                        // Generate falling objects
+                        if (Math.random() < 0.05) { // Chance to spawn object
+                            const type = Math.random() < 0.8 ? 'fruit' : 'bomb'; // 80% fruit, 20% bomb
+                            fallingObjects.push({
+                                x: Math.random() * originalCanvasWidth,
+                                y: 0,
+                                radius: 15,
+                                speed: Math.random() * 2 + 1,
+                                type: type
+                            });
+                        }
+
+                        // Update falling objects and check for collisions
+                        for (let i = 0; i < fallingObjects.length; i++) {
+                            const obj = fallingObjects[i];
+                            obj.y += obj.speed;
+
+                            // Collision with player (using original coordinates)
+                            if (obj.y + obj.radius > player.y && obj.y - obj.radius < player.y + player.height &&
+                                obj.x + obj.radius > player.x && obj.x - obj.radius < player.x + player.width) {
+                                if (obj.type === 'fruit') {
+                                    score += 10;
+                                    scoreDisplay.textContent = 'Score: ' + score;
+                                    if (gameInstance.winCondition(score) && !coinsAwarded) {
+                                        gameMessage.textContent = `Mubarak ho! Aapne ${gameInstance.coinReward} coins jeete!`;
+                                        gameMessage.classList.add('text-green-400');
+                                        awardCoins(gameInstance.coinReward);
+                                        coinsAwarded = true;
+                                    }
+                                } else { // It's a bomb
+                                    endGame();
+                                    return;
+                                }
+                                fallingObjects.splice(i, 1); // Remove object after collision
+                                i--;
+                            } else if (obj.y > originalCanvasHeight + obj.radius) {
+                                // Remove object if it goes off screen
+                                fallingObjects.splice(i, 1);
+                                i--;
+                            }
+                        }
+
+                        drawPlayer();
+                        drawFallingObjects();
+                        requestAnimationFrame(updateGame); // Use requestAnimationFrame
+                    }
+
+                    function startGame() {
+                        if (gameRunning) return;
+                        resetGame();
+                        gameRunning = true;
+                        startButton.disabled = true;
+                        resetButton.disabled = false;
+                        gameMessage.textContent = '';
+                        gameMessage.classList.remove('text-green-400');
+                        gameLoopInterval = requestAnimationFrame(updateGame); // Use requestAnimationFrame
+                    }
+
+                    function endGame() {
+                        gameRunning = false;
+                        cancelAnimationFrame(gameLoopInterval);
+                        scoreDisplay.textContent = 'Game Over! Final Score: ' + score;
+                        startButton.disabled = false;
+                        resetButton.disabled = false;
+                    }
+
+                    function resetGame() {
+                        clearInterval(gameLoopInterval);
+                        player = { x: originalCanvasWidth / 2 - 25, y: originalCanvasHeight - 60, width: 50, height: 10, speed: 7 }; // Reset to original coords
+                        fallingObjects = [];
+                        score = 0;
+                        gameMessage.textContent = '';
+                        gameMessage.classList.remove('text-green-400');
+                        scoreDisplay.textContent = 'Score: 0';
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        drawPlayer();
+                        gameRunning = false;
+                        startButton.disabled = false;
+                        resetButton.disabled = true;
+                        coinsAwarded = false;
+                    }
+
+                    startButton.addEventListener('click', startGame);
+                    resetButton.addEventListener('click', resetGame);
+                    window.addEventListener('resize', resizeCanvas); // Add resize listener
+
+                    resetGame(); // Initial draw
+                    resizeCanvas(); // Set initial canvas size
                 }
             }
-        ]
-
+        ];
 
         const gamesContainer = document.getElementById('gamesContainer');
         const gameModalOverlay = document.getElementById('gameModalOverlay');
@@ -3011,6 +3765,12 @@
         const shopIcon = document.getElementById('shopIcon');
         const shopModalOverlay = document.getElementById('shopModalOverlay');
         const closeShopModalButton = document.getElementById('closeShopModalButton');
+        const profileIcon = document.getElementById('profileIcon');
+        const profileModalOverlay = document.getElementById('profileModalOverlay');
+        const closeProfileModalButton = document.getElementById('closeProfileModalButton');
+        const leaderboardModalOverlay = document.getElementById('leaderboardModalOverlay');
+        const closeLeaderboardModalButton = document.getElementById('closeLeaderboardModalButton');
+
 
         let currentCategory = 'All Games'; // Track active category
 
@@ -3023,7 +3783,7 @@
 
             // Filter by current category first
             let gamesToRender = gamesToFilter;
-            if (currentCategory !== 'All Games') {
+            if (currentCategory !== 'All Games' && currentCategory !== 'Leaderboard') { // Exclude 'Leaderboard' from game filtering
                 gamesToRender = gamesToRender.filter(game => game.category.includes(currentCategory));
             }
 
@@ -3100,6 +3860,7 @@
          * @param {string} type - 'game' or 'info'
          */
         function openGameModal(id, type = 'game') {
+            document.body.classList.add('modal-open'); // Lock background scroll
             if (type === 'game') {
                 const game = games.find(g => g.id === id);
                 if (game) {
@@ -3131,6 +3892,7 @@
             gameModalOverlay.classList.remove('show'); // Hide the modal
             modalTitle.textContent = ''; // Clear title
             modalContent.innerHTML = ''; // Clear game content
+            document.body.classList.remove('modal-open'); // Unlock background scroll
         }
 
         // Event listener for closing the game modal
@@ -3145,12 +3907,14 @@
 
         // --- Shop Modal Functions ---
         function openShopModal() {
+            document.body.classList.add('modal-open'); // Lock background scroll
             shopModalOverlay.classList.add('show');
             renderShop(); // Render shop items when modal opens
         }
 
         function closeShopModal() {
             shopModalOverlay.classList.remove('show');
+            document.body.classList.remove('modal-open'); // Unlock background scroll
         }
 
         // Event listener for opening the shop modal
@@ -3160,6 +3924,50 @@
         shopModalOverlay.addEventListener('click', (event) => {
             if (event.target === shopModalOverlay) {
                 closeShopModal();
+            }
+        });
+
+        // --- Profile Modal Functions ---
+        function openProfileModal() {
+            document.body.classList.add('modal-open'); // Lock background scroll
+            profileModalOverlay.classList.add('show');
+            updateProfileDisplay(); // Update content when modal opens
+        }
+
+        function closeProfileModal() {
+            profileModalOverlay.classList.remove('show');
+            document.body.classList.remove('modal-open'); // Unlock background scroll
+        }
+
+        // Event listener for opening the profile modal
+        profileIcon.addEventListener('click', openProfileModal);
+        // Event listener for closing the profile modal
+        closeProfileModalButton.addEventListener('click', closeProfileModal);
+        profileModalOverlay.addEventListener('click', (event) => {
+            if (event.target === profileModalOverlay) {
+                closeProfileModal();
+            }
+        });
+
+        // --- Leaderboard Modal Functions ---
+        function openLeaderboardModal() {
+            document.body.classList.add('modal-open'); // Lock background scroll
+            leaderboardModalOverlay.classList.add('show');
+            updateLeaderboardDisplay(); // Update content when modal opens
+        }
+
+        function closeLeaderboardModal() {
+            leaderboardModalOverlay.classList.remove('show');
+            document.body.classList.remove('modal-open'); // Unlock background scroll
+        }
+
+        // Event listener for opening the leaderboard modal
+        // This will be triggered by the sidebar icon
+        // No direct button in HTML for now, handled by sidebar click
+        closeLeaderboardModalButton.addEventListener('click', closeLeaderboardModal);
+        leaderboardModalOverlay.addEventListener('click', (event) => {
+            if (event.target === leaderboardModalOverlay) {
+                closeLeaderboardModal();
             }
         });
 
@@ -3174,12 +3982,33 @@
 
                 currentCategory = icon.dataset.category;
                 mainContentTitle.textContent = currentCategory; // Update main title
-                renderGameCards(); // Re-render games based on new category
+
+                if (currentCategory === 'Leaderboard') {
+                    openLeaderboardModal();
+                    // Optionally, hide game cards when leaderboard is open
+                    gamesContainer.innerHTML = '';
+                    featuredGamesContainer.innerHTML = '';
+                } else {
+                    closeLeaderboardModal(); // Close leaderboard if another category is selected
+                    renderGameCards(); // Re-render games based on new category
+                    renderFeaturedGames(); // Re-render featured games
+                }
             });
         });
 
         // --- Search Functionality ---
         searchInput.addEventListener('input', () => {
+            // If search is used, ensure we're not in a special mode like Leaderboard
+            if (currentCategory === 'Leaderboard') {
+                // Optionally, switch back to 'All Games' or clear search if in leaderboard view
+                // For now, search will just filter the current view (which is empty if leaderboard is open)
+                // A better UX would be to switch to 'All Games' and then apply search.
+                currentCategory = 'All Games';
+                mainContentTitle.textContent = 'All Games';
+                sidebarIcons.forEach(i => i.classList.remove('active'));
+                document.querySelector('.sidebar-icon[data-category="All Games"]').classList.add('active');
+                closeLeaderboardModal();
+            }
             renderGameCards(); // Re-render games based on search input
         });
 
@@ -3191,5 +4020,6 @@
         });
 
     </script>
+
 </body>
 </html>
